@@ -74,6 +74,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Privilege.cs" />
+    <Compile Include="PrivilegeNotHeldException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
