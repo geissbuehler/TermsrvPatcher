@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Button x:Name="buttonVersion" Content="Version" HorizontalAlignment="Left" Margin="77,69,0,0" VerticalAlignment="Top" Width="75" Click="buttonVersion_Click"/>
+        <Button x:Name="buttonChown" Content="Chown" HorizontalAlignment="Left" Margin="77,96,0,0" VerticalAlignment="Top" Width="75" Click="buttonChown_Click"/>
+        <Button x:Name="buttonTest" Content="Test" HorizontalAlignment="Left" Margin="77,123,0,0" VerticalAlignment="Top" Width="75" Click="buttonTest_Click"/>
+        <TextBlock x:Name="textBlockMessages" HorizontalAlignment="Left" Height="95" Margin="10,216,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="499" Foreground="#FF3E942B"/>
+
     </Grid>
 </Window>
