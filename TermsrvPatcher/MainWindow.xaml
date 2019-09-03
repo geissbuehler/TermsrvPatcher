@@ -12,10 +12,10 @@
             <ColumnDefinition Width="488*"/>
         </Grid.ColumnDefinitions>
         <TextBlock x:Name="textBlockMessages" HorizontalAlignment="Left" Height="96" Margin="176,215,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="302" Foreground="#FF3E942B" Grid.Column="1"/>
-        <TextBox x:Name="textBoxFind" HorizontalAlignment="Left" Height="23" Margin="211,104,0,0" TextWrapping="Wrap" Text="39 81 3C 06 00 00 0F 84 53 71 02 00" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
+        <TextBox x:Name="textBoxFind" HorizontalAlignment="Left" Height="23" Margin="211,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
         <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="211,78,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="211,132,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <TextBox x:Name="textBoxReplace" HorizontalAlignment="Left" Height="23" Margin="211,158,0,0" TextWrapping="Wrap" Text="B8 00 01 00 00 89 81 38 06 00 00 90" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
+        <TextBox x:Name="textBoxReplace" HorizontalAlignment="Left" Height="23" Margin="211,158,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
         <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="66" Margin="10,10,0,0" VerticalAlignment="Top" Width="171" Grid.ColumnSpan="2">
             <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" GroupName="EnableRdp"/>
         </GroupBox>

@@ -43,7 +43,7 @@ namespace TermsrvPatcher
                 radioButtonDisableBlank.IsChecked = true;
             }
             checkBoxTestMode.IsChecked = true;
-            checkStatus();
+            //checkStatus();
         }
 
         private void buttonPatch_Click(object sender, RoutedEventArgs e)
