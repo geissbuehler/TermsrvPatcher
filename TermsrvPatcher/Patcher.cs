@@ -5,14 +5,68 @@ using System.Security.Principal;
 using System.Security.AccessControl;
 using PrivilegeClass;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Win32;
 
 namespace TermsrvPatcher
 {
     class Patcher
     {
-        public string termsrvPath { get; }
         private byte[] termsrvContent;
+        public string termsrvPath { get; }
+        public bool allowRdp
+        {
+            get
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 1).Equals(0);
+            }
+            set
+            {
+                if (value)
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
+                }
+                else
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 1, RegistryValueKind.DWord);
+                }
+            }
+        }
+        public bool allowMulti
+        {
+            get
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1).Equals(0);
+            }
+            set
+            {
+                if (value)
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 0, RegistryValueKind.DWord);
+                }
+                else
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
+                }
+            }
+        }
+        public bool allowBlank
+        {
+            get
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1).Equals(0);
+            }
+            set
+            {
+                if (value)
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);
+                }
+                else
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 0, RegistryValueKind.DWord);
+                }
+            }
+        }
 
         public static string getTermsrvPath()
         {
@@ -23,13 +77,43 @@ namespace TermsrvPatcher
         public Patcher()
         {
             termsrvPath = getTermsrvPath();
-            termsrvContent = File.ReadAllBytes(termsrvPath);
+            readFile();
         }
 
         public Patcher(string path)
         {
             termsrvPath = path;
+            readFile();
+        }
+
+        public void readFile()
+        {
             termsrvContent = File.ReadAllBytes(termsrvPath);
+        }
+
+        public int checkStatus(string find, string replace)
+        {
+            int[] findArr = strToIntArr(find);
+            byte[] replaceArr = strToByteArr(replace);
+
+            if (findPattern(replaceArr) == -1)
+            {
+                if(findPattern(findArr) == -1)
+                {
+                    // Patch status unknown
+                    return -1;
+                }
+                else
+                {
+                    // Unpatched
+                    return 0;
+                }
+            }
+            else
+            {
+                // Patched
+                return 1;
+            }
         }
 
         public void patch(string find, string replace)
@@ -51,37 +135,6 @@ namespace TermsrvPatcher
             setFullControl(getAdministratorsIdentity());
             FileInfo fi = new FileInfo(termsrvPath);
             long l = fi.Length;
-            //string find = "39 81 3C 06 00 00 0F 84 53 71 02 00";
-            //string replace = "B8 00 01 00 00 89 81 38 06 00 00 90";
-            /*int? firstHex = null; // handles asterisks at beginning
-            List<int> findArr = new List<int>();
-            foreach (string hex in find.Split(' '))
-            {
-                if (hex != System.String.Empty)
-                {
-                    if (hex == "*")
-                    {
-                        findArr.Add(-1);
-                    }
-                    else
-                    {
-                        if (firstHex == null)
-                        {
-                            // Position of first non-astersik
-                            firstHex = findArr.Count;
-                        }
-                        findArr.Add(System.Convert.ToInt32(hex, 16));
-                    }
-                }
-            }
-            if (findArr.Count == 0)
-            {
-                // Exception
-            }
-            if (firstHex == null)
-            {
-                // Exception here
-            }*/
 
             List<byte> binReplace = new List<byte>();
             foreach (string hex in replace.Split(' '))
@@ -96,21 +149,17 @@ namespace TermsrvPatcher
                 // Exception
             }
 
-            /*int match = findPattern(findArr.ToArray());
-
-            if (match == -1)
-            {
-                // Exception
-            }*/
-
             using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(match, SeekOrigin.Begin);
                 writer.Write(binReplace.ToArray());
             }
+
+            // Re-read contents to reflect actual patch status
+            readFile();
         }
 
-        public int[] strToIntArr(string pattern)
+        private int[] strToIntArr(string pattern)
         {
             int firstHex = -1;
             List<int> bin = new List<int>();
@@ -140,7 +189,7 @@ namespace TermsrvPatcher
             return bin.ToArray();
         }
 
-        public byte[] strToByteArr(string pattern)
+        private byte[] strToByteArr(string pattern)
         {
             List<byte> bin = new List<byte>();
             foreach (string hex in pattern.Split(' '))
@@ -217,53 +266,6 @@ namespace TermsrvPatcher
                     break;
                 }
             }
-
-            return matchPos;
-        }
-
-        private int _findPattern(int[] pattern)
-        {
-            //var firstHex = pattern.Where(value => value >-1);
-            //pattern.SequenceEqual;
-            //pattern.Take;
-            //pattern.;
-            int firstHexPos = Array.FindIndex(pattern, value => value > -1);
-
-            if (firstHexPos == -1)
-            {
-                throw new Exception();
-            }
-
-            int matchPos;
-            int searchStartPos = firstHexPos;
-            int idx;
-            do
-            {
-                idx = Array.FindIndex(termsrvContent.Skip(searchStartPos).ToArray(), value => value == pattern[firstHexPos]);
-                if (idx == -1)
-                {
-                    // Exception?
-                    matchPos = -1;
-                    break;
-                }
-                searchStartPos += idx;
-                if (searchStartPos + pattern.Length - firstHexPos > termsrvContent.Length) // -1?
-                {
-                    // Exception?
-                    matchPos = -1;
-                    break;
-                }
-                matchPos = searchStartPos - firstHexPos;
-                for (int searchPos = firstHexPos; searchPos < pattern.Length; searchPos++)
-                {
-                    if (pattern[searchPos] != -1 && pattern[searchPos] != termsrvContent[searchStartPos + searchPos])
-                    {
-                        searchStartPos++;
-                        matchPos = -1;
-                        break;
-                    }
-                }
-            } while (matchPos == -1);
 
             return matchPos;
         }

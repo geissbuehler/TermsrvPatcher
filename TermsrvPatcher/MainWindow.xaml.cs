@@ -1,10 +1,10 @@
 ﻿using System.Windows;
 using System.IO;
 using System.Diagnostics;
-using System.Collections.Generic;
 using System;
-using Microsoft.Win32;
 using System.ServiceProcess;
+using NetFwTypeLib;
+using System.Linq;
 
 namespace TermsrvPatcher
 {
@@ -13,13 +13,105 @@ namespace TermsrvPatcher
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Patcher patcher;
         public MainWindow()
         {
             InitializeComponent();
-            radioButtonEnableRdp.IsChecked = true;
+            patcher = new Patcher();
+            if (patcher.allowRdp)
+            {
+                radioButtonEnableRdp.IsChecked = true;
+            }
+            else
+            {
+                radioButtonDisableRdp.IsChecked = true;
+            }
+            if (patcher.allowMulti)
+            {
+                radioButtonEnableMulti.IsChecked = true;
+            }
+            else
+            {
+                radioButtonDisableMulti.IsChecked = true;
+            }
+            if (patcher.allowBlank)
+            {
+                radioButtonEnableBlank.IsChecked = true;
+            }
+            else
+            {
+                radioButtonDisableBlank.IsChecked = true;
+            }
+            checkBoxTestMode.IsChecked = true;
+            checkStatus();
         }
 
-        private void buttonTest_Click(object sender, RoutedEventArgs e)
+        private void buttonPatch_Click(object sender, RoutedEventArgs e)
+        {
+            patch();
+            checkStatus();
+        }
+
+        private void buttonSetRegistry_Click(object sender, RoutedEventArgs e)
+        {
+            setRegistry();
+        }
+
+        private void buttonCheckStatus_Click(object sender, RoutedEventArgs e)
+        {
+            checkStatus();
+        }
+
+        private void checkStatus()
+        {
+            switch (patcher.checkStatus(textBoxFind.Text, textBoxReplace.Text))
+            {
+                case 1:
+                    textBlockMessages.Text += "Status: Patched";
+                    break;
+                case 0:
+                    textBlockMessages.Text += "Status: Unpatched";
+                    break;
+                case -1:
+                    textBlockMessages.Text += "Status: Unkown";
+                    break;
+            }
+        }
+
+        private void patch()
+        {
+            ServiceController sc = new ServiceController("TermService");
+
+            if (sc.Status == ServiceControllerStatus.Running)
+            {
+                sc.Stop();
+            }
+            sc.WaitForStatus(ServiceControllerStatus.Stopped);
+
+            if (patcher.checkStatus(textBoxFind.Text, textBoxReplace.Text) == 0)
+            {
+                patcher.patch(textBoxFind.Text, textBoxReplace.Text);
+            }
+
+            sc.Start();
+            sc.WaitForStatus(ServiceControllerStatus.Running);
+        }
+
+        private void setRegistry()
+        {
+            bool blank = patcher.allowBlank;
+            /*//RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Terminal Server", true);
+            // Enable RDP
+            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
+
+            // Disable multiple sessions per user
+            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
+
+            // Disable remote logon for user accounts that are not password protected
+            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);*/
+        }
+
+        private void checkBoxTestMode_Checked(object sender, RoutedEventArgs e)
         {
             /// <summary>
             /// Prepares a copy of termsrv.dll for testing the processing of taking ownership, getting full control and patching the file.
@@ -28,10 +120,10 @@ namespace TermsrvPatcher
 
             //RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Terminal Server", true);
             // Enable RDP
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
+            //Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
 
             // Disable multiple sessions per user
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
+            //Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
 
             // Disable remote logon for user accounts that are not password protected
             //Registry.SetValue(@"HKLM\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);
@@ -49,10 +141,10 @@ namespace TermsrvPatcher
             Process.Start("robocopy.exe", String.Format(@"/mir /lev:1 /copyall /secfix {0} {1} {2}.*", Path.GetDirectoryName(termsrvPath), testFolder, Path.GetFileNameWithoutExtension(termsrvPath))).WaitForExit();
 
             // Patch the test file
-            Patcher p = new Patcher(Path.Combine(testFolder, Path.GetFileName(termsrvPath)));
-            p.patch(textBoxFind.Text, textBoxReplace.Text);
+            patcher = new Patcher(Path.Combine(testFolder, Path.GetFileName(termsrvPath)));
+            //patcher.patch(textBoxFind.Text, textBoxReplace.Text);
 
-            ServiceController sc = new ServiceController("TermService");
+            /*ServiceController sc = new ServiceController("TermService");
             if (sc.Status == ServiceControllerStatus.Running)
             {
                 sc.Stop();
@@ -60,38 +152,24 @@ namespace TermsrvPatcher
             sc.WaitForStatus(ServiceControllerStatus.Stopped);
 
             sc.Start();
-            sc.WaitForStatus(ServiceControllerStatus.Running);
+            sc.WaitForStatus(ServiceControllerStatus.Running);*/
+            checkStatus();
         }
 
-        private void buttonPatch_Click(object sender, RoutedEventArgs e)
+        private void checkBoxTestMode_Unchecked(object sender, RoutedEventArgs e)
         {
-            ServiceController sc = new ServiceController("TermService");
-
-            if (sc.Status == ServiceControllerStatus.Running)
-            {
-                sc.Stop();
-            }
-            sc.WaitForStatus(ServiceControllerStatus.Stopped);
-
-            // Patch the real file
-            Patcher p = new Patcher();
-            p.patch(textBoxFind.Text, textBoxReplace.Text);
-
-            sc.Start();
-            sc.WaitForStatus(ServiceControllerStatus.Running);
+            patcher = new Patcher();
+            checkStatus();
         }
 
-        private void buttonSetRegistry_Click(object sender, RoutedEventArgs e)
+        private void buttonTest_Click(object sender, RoutedEventArgs e)
         {
-            //RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Terminal Server", true);
-            // Enable RDP
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
+            INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
+                Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-            // Disable multiple sessions per user
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
+            var foo = firewallPolicy.Rules.OfType<INetFwRule>();
+            INetFwRule firewallRule = firewallPolicy.Rules.OfType<INetFwRule>().Where(x => x.LocalPorts == "3389").FirstOrDefault();
 
-            // Disable remote logon for user accounts that are not password protected
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);
         }
     }
 }

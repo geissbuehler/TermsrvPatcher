@@ -5,20 +5,34 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TermsrvPatcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Remote Desktop Patcher" Height="350" Width="525">
     <Grid>
-        <Button x:Name="buttonTest" Content="Test" HorizontalAlignment="Left" Margin="403,21,0,0" VerticalAlignment="Top" Width="75" Click="buttonTest_Click"/>
-        <TextBlock x:Name="textBlockMessages" HorizontalAlignment="Left" Height="95" Margin="10,216,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="499" Foreground="#FF3E942B"/>
-        <TextBox x:Name="textBoxFind" HorizontalAlignment="Left" Height="23" Margin="242,104,0,0" TextWrapping="Wrap" Text="39 81 3C 06 00 00 0F 84 53 71 02 00" VerticalAlignment="Top" Width="236"/>
-        <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="242,78,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="242,132,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="textBoxReplace" HorizontalAlignment="Left" Height="23" Margin="242,158,0,0" TextWrapping="Wrap" Text="B8 00 01 00 00 89 81 38 06 00 00 90" VerticalAlignment="Top" Width="236"/>
-        <GroupBox x:Name="groupBoxEnableRdp" Header="Enable RDP" HorizontalAlignment="Left" Height="66" Margin="10,10,0,0" VerticalAlignment="Top" Width="203">
-            <RadioButton x:Name="radioButtonEnableRdp" Content="Enable RDP [recommended]" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" GroupName="EnableRdp"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="31*"/>
+            <ColumnDefinition Width="488*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="textBlockMessages" HorizontalAlignment="Left" Height="96" Margin="176,215,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="302" Foreground="#FF3E942B" Grid.Column="1"/>
+        <TextBox x:Name="textBoxFind" HorizontalAlignment="Left" Height="23" Margin="211,104,0,0" TextWrapping="Wrap" Text="39 81 3C 06 00 00 0F 84 53 71 02 00" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
+        <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="211,78,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="211,132,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBox x:Name="textBoxReplace" HorizontalAlignment="Left" Height="23" Margin="211,158,0,0" TextWrapping="Wrap" Text="B8 00 01 00 00 89 81 38 06 00 00 90" VerticalAlignment="Top" Width="236" Grid.Column="1"/>
+        <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="66" Margin="10,10,0,0" VerticalAlignment="Top" Width="171" Grid.ColumnSpan="2">
+            <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" GroupName="EnableRdp"/>
         </GroupBox>
-        <RadioButton x:Name="radioButtonDisableRdp" Content="Disable RDP" HorizontalAlignment="Left" Margin="26,56,0,0" VerticalAlignment="Top" GroupName="EnableRdp"/>
-        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="246,36,0,0" VerticalAlignment="Top" Width="75" Click="buttonPatch_Click"/>
-        <Button x:Name="buttonSetRegistry" Content="Set Registry" HorizontalAlignment="Left" Margin="367,56,0,0" VerticalAlignment="Top" Width="75" Click="buttonSetRegistry_Click"/>
+        <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" HorizontalAlignment="Left" Margin="26,53,0,0" VerticalAlignment="Top" GroupName="EnableRdp" Grid.ColumnSpan="2"/>
+        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="357,24,0,0" VerticalAlignment="Top" Width="90" Click="buttonPatch_Click" Grid.Column="1"/>
+        <Button x:Name="buttonSetRegistry" Content="Set Registry" HorizontalAlignment="Left" Margin="211,53,0,0" VerticalAlignment="Top" Width="75" Click="buttonSetRegistry_Click" Grid.Column="1"/>
+        <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="211,24,0,0" VerticalAlignment="Top" Width="90" Click="buttonCheckStatus_Click" Grid.Column="1"/>
+        <CheckBox x:Name="checkBoxTestMode" Content="Test Mode" HorizontalAlignment="Left" Margin="357.333,78,0,0" VerticalAlignment="Top" Checked="checkBoxTestMode_Checked" Unchecked="checkBoxTestMode_Unchecked" Grid.Column="1"/>
+        <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Height="68" Width="171" Grid.ColumnSpan="2">
+            <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" GroupName="Multi"/>
+        </GroupBox>
+        <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" HorizontalAlignment="Left" Margin="26,126,0,0" VerticalAlignment="Top" GroupName="Multi" Grid.ColumnSpan="2"/>
+        <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,154,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="73" Width="171" Grid.ColumnSpan="2">
+            <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" GroupName="Blank"/>
+        </GroupBox>
+        <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" HorizontalAlignment="Left" Margin="26,203,0,0" VerticalAlignment="Top" GroupName="Blank" Grid.ColumnSpan="2"/>
+        <Button x:Name="buttonTest" Content="Test" Grid.Column="1" HorizontalAlignment="Left" Margin="323.333,53,0,0" VerticalAlignment="Top" Width="75" Click="buttonTest_Click"/>
 
     </Grid>
 </Window>
