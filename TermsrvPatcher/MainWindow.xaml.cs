@@ -76,6 +76,7 @@ namespace TermsrvPatcher
                     textBlockMessages.Text += "Status: Unkown";
                     break;
             }
+            textBlockMessages.Text += Environment.NewLine;
         }
 
         private void patch()

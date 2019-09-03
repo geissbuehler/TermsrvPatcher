@@ -131,8 +131,8 @@ namespace TermsrvPatcher
                 File.Copy(termsrvPath, backup);
                 //textBlockMessages.Text += " OK";
             }
-            takeOwnership(getAdministratorsIdentity());
-            setFullControl(getAdministratorsIdentity());
+            //takeOwnership(getAdministratorsIdentity());
+            //setFullControl(getAdministratorsIdentity());
             FileInfo fi = new FileInfo(termsrvPath);
             long l = fi.Length;
 
