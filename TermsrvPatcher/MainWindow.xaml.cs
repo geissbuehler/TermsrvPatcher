@@ -42,7 +42,8 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
-            checkBoxTestMode.IsChecked = true;
+            textBlockMessages.Text = "termsrv.dll version: " + patcher.getVersion();
+            //checkBoxTestMode.IsChecked = true;
             //checkStatus();
         }
 
@@ -154,7 +155,7 @@ namespace TermsrvPatcher
 
             sc.Start();
             sc.WaitForStatus(ServiceControllerStatus.Running);*/
-            checkStatus();
+            //checkStatus();
         }
 
         private void checkBoxTestMode_Unchecked(object sender, RoutedEventArgs e)
