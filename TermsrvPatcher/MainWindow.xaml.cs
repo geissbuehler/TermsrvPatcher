@@ -42,7 +42,7 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
-            textBlockMessages.Text = "termsrv.dll version: " + patcher.getVersion();
+            scrollviewerMessages.Content = "termsrv.dll version: " + patcher.getVersion() + Environment.NewLine;
             //checkBoxTestMode.IsChecked = true;
             //checkStatus();
         }
@@ -68,16 +68,16 @@ namespace TermsrvPatcher
             switch (patcher.checkStatus(textBoxFind.Text, textBoxReplace.Text))
             {
                 case 1:
-                    textBlockMessages.Text += "Status: Patched";
+                    scrollviewerMessages.Content += "Status: Patched";
                     break;
                 case 0:
-                    textBlockMessages.Text += "Status: Unpatched";
+                    scrollviewerMessages.Content += "Status: Unpatched";
                     break;
                 case -1:
-                    textBlockMessages.Text += "Status: Unkown";
+                    scrollviewerMessages.Content += "Status: Unkown";
                     break;
             }
-            textBlockMessages.Text += Environment.NewLine;
+            scrollviewerMessages.Content += Environment.NewLine;
         }
 
         private void patch()
