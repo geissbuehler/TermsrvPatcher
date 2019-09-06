@@ -53,6 +53,12 @@ namespace TermsrvPatcher
             checkStatus();
         }
 
+        private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
+        {
+            unpatch();
+            checkStatus();
+        }
+
         private void buttonSetRegistry_Click(object sender, RoutedEventArgs e)
         {
             setRegistry();
@@ -94,6 +100,22 @@ namespace TermsrvPatcher
             {
                 patcher.patch(textBoxFind.Text, textBoxReplace.Text);
             }
+
+            sc.Start();
+            sc.WaitForStatus(ServiceControllerStatus.Running);
+        }
+
+        private void unpatch()
+        {
+            ServiceController sc = new ServiceController("TermService");
+
+            if (sc.Status == ServiceControllerStatus.Running)
+            {
+                sc.Stop();
+            }
+            sc.WaitForStatus(ServiceControllerStatus.Stopped);
+
+            patcher.unpatch();
 
             sc.Start();
             sc.WaitForStatus(ServiceControllerStatus.Running);

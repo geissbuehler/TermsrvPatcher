@@ -159,6 +159,19 @@ namespace TermsrvPatcher
             readFile();
         }
 
+        public void unpatch()
+        {
+
+            string backup = termsrvPath + "." + getVersion();
+            if (File.Exists(backup))
+            {
+                File.Copy(backup, termsrvPath);
+            }
+
+            // Re-read contents to reflect actual patch status
+            readFile();
+        }
+
         private int[] strToIntArr(string pattern)
         {
             int firstHex = -1;
