@@ -86,9 +86,21 @@ namespace TermsrvPatcher
             readFile();
         }
 
+        /// <summary>
+        /// Reads the content of the specified file into the buffer
+        /// </summary>
+        /// <param name="path"></param>
+        public void readFile(string path)
+        {
+            termsrvContent = File.ReadAllBytes(path);
+        }
+
+        /// <summary>
+        /// Reada the content of termsrv.dll into the buffer
+        /// </summary>
         public void readFile()
         {
-            termsrvContent = File.ReadAllBytes(termsrvPath);
+            readFile(termsrvPath);
         }
 
         public int checkStatus(string find, string replace)
@@ -160,6 +172,27 @@ namespace TermsrvPatcher
         }
 
         public void unpatch()
+        {
+            string backup = termsrvPath + "." + getVersion();
+            if (!File.Exists(backup))
+            {
+                // Exception
+            }
+            // Read the unpatched file into the buffer
+            readFile(backup);
+
+            // Write the content of the unpatched file into termsrv.dll (insted of copying the file to maintain file permisions)
+            using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
+            {
+                writer.BaseStream.Seek(0, SeekOrigin.Begin);
+                writer.Write(termsrvContent);
+            }
+
+            // Re-read contents to reflect actual patch status
+            readFile();
+        }
+
+        public void unpatch_old()
         {
 
             string backup = termsrvPath + "." + getVersion();
