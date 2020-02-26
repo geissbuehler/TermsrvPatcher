@@ -24,7 +24,6 @@
         <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="211,53,0,0" VerticalAlignment="Top" Width="90" Click="buttonPatch_Click" Grid.Column="1"/>
         <Button x:Name="buttonSetRegistry" Content="Set Registry" HorizontalAlignment="Left" Margin="10,238,0,0" VerticalAlignment="Top" Width="75" Click="buttonSetRegistry_Click" Grid.ColumnSpan="2"/>
         <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="211,24,0,0" VerticalAlignment="Top" Width="90" Click="buttonCheckStatus_Click" Grid.Column="1"/>
-        <CheckBox x:Name="checkBoxTestMode" Content="Test Mode" HorizontalAlignment="Left" Margin="357.333,78,0,0" VerticalAlignment="Top" Checked="checkBoxTestMode_Checked" Unchecked="checkBoxTestMode_Unchecked" Grid.Column="1"/>
         <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Height="68" Width="171" Grid.ColumnSpan="2">
             <StackPanel Margin="10,10,-2,-12">
                 <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi"/>
