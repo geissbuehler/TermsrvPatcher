@@ -6,6 +6,7 @@ using System.Security.AccessControl;
 using PrivilegeClass;
 using System.Collections.Generic;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace TermsrvPatcher
 {
@@ -13,6 +14,33 @@ namespace TermsrvPatcher
     {
         private byte[] termsrvContent;
         public string termsrvPath { get; }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr LoadLibrary(string lpLibFileName);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool FreeLibrary(IntPtr hLibModule);
+
+        private IntPtr NSudoDevilModeModuleHandle;
+
+        private void EnableDevilMode()
+        {
+            if (Environment.Is64BitProcess)
+            {
+                NSudoDevilModeModuleHandle = LoadLibrary(@"NSudoDevilMode\x64\NSudoDM.dll");
+            }
+            else
+            {
+                NSudoDevilModeModuleHandle = LoadLibrary(@"NSudoDevilMode\x86\NSudoDM.dll");
+            }
+        }
+
+        private void DisableDevilMode()
+        {
+            FreeLibrary(NSudoDevilModeModuleHandle);
+        }
+
         public bool allowRdp
         {
             get
@@ -143,8 +171,6 @@ namespace TermsrvPatcher
                 File.Copy(termsrvPath, backup);
                 //textBlockMessages.Text += " OK";
             }
-            //takeOwnership(getAdministratorsIdentity());
-            //setFullControl(getAdministratorsIdentity());
             FileInfo fi = new FileInfo(termsrvPath);
             long l = fi.Length;
 
@@ -161,11 +187,13 @@ namespace TermsrvPatcher
                 // Exception
             }
 
+            EnableDevilMode();
             using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(match, SeekOrigin.Begin);
                 writer.Write(binReplace.ToArray());
             }
+            DisableDevilMode();
 
             // Re-read contents to reflect actual patch status
             readFile();
@@ -181,25 +209,14 @@ namespace TermsrvPatcher
             // Read the unpatched file into the buffer
             readFile(backup);
 
+            EnableDevilMode();
             // Write the content of the unpatched file into termsrv.dll (insted of copying the file to maintain file permisions)
             using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(0, SeekOrigin.Begin);
                 writer.Write(termsrvContent);
             }
-
-            // Re-read contents to reflect actual patch status
-            readFile();
-        }
-
-        public void unpatch_old()
-        {
-
-            string backup = termsrvPath + "." + getVersion();
-            if (File.Exists(backup))
-            {
-                File.Copy(backup, termsrvPath);
-            }
+            DisableDevilMode();
 
             // Re-read contents to reflect actual patch status
             readFile();
@@ -324,26 +341,6 @@ namespace TermsrvPatcher
         public IdentityReference getAdministratorsIdentity()
         {
             return new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null);
-        }
-
-        public void takeOwnership(IdentityReference identity)
-        {
-            FileInfo fi = new FileInfo(termsrvPath);
-            FileSecurity fs = fi.GetAccessControl();
-            Privilege p = new Privilege(Privilege.TakeOwnership);
-            p.Enable();
-            fs.SetOwner(identity);
-            File.SetAccessControl(termsrvPath, fs); //Update the Access Control on the File
-            p.Revert();
-        }
-
-        public void setFullControl(IdentityReference identity)
-        {
-            FileInfo fi = new FileInfo(termsrvPath);
-            FileSecurity fs = fi.GetAccessControl();
-
-            fs.SetAccessRule(new FileSystemAccessRule(identity, FileSystemRights.FullControl, AccessControlType.Allow));
-            File.SetAccessControl(termsrvPath, fs);
         }
     }
 }
