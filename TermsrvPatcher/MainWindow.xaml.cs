@@ -123,16 +123,9 @@ namespace TermsrvPatcher
 
         private void setRegistry()
         {
-            bool blank = patcher.allowBlank;
-            /*//RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Terminal Server", true);
-            // Enable RDP
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 0, RegistryValueKind.DWord);
-
-            // Disable multiple sessions per user
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fSingleSessionPerUser", 1, RegistryValueKind.DWord);
-
-            // Disable remote logon for user accounts that are not password protected
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);*/
+            patcher.allowRdp = radioButtonEnableRdp.IsChecked.GetValueOrDefault();
+            patcher.allowMulti = radioButtonEnableMulti.IsChecked.GetValueOrDefault();
+            patcher.allowBlank = radioButtonEnableBlank.IsChecked.GetValueOrDefault();
         }
 
         private void buttonTest_Click(object sender, RoutedEventArgs e)
