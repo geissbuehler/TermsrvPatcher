@@ -10,7 +10,7 @@ namespace TermsrvPatcher
     class Patcher
     {
         private byte[] termsrvContent;
-        public string termsrvPath { get; }
+        public string TermsrvPath { get; }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         static extern IntPtr LoadLibrary(string lpLibFileName);
@@ -38,7 +38,7 @@ namespace TermsrvPatcher
             FreeLibrary(NSudoDevilModeModuleHandle);
         }
 
-        public bool allowRdp
+        public bool AllowRdp
         {
             get
             {
@@ -56,7 +56,8 @@ namespace TermsrvPatcher
                 }
             }
         }
-        public bool allowMulti
+
+        public bool AllowMulti
         {
             get
             {
@@ -74,7 +75,8 @@ namespace TermsrvPatcher
                 }
             }
         }
-        public bool allowBlank
+
+        public bool AllowBlank
         {
             get
             {
@@ -93,7 +95,7 @@ namespace TermsrvPatcher
             }
         }
 
-        public static string getTermsrvPath()
+        public static string GetTermsrvPath()
         {
             // Be aware that the process must run in 64-bit mode on 64-bit systems (otherwise termserv.dll is only accessible via C:\Windows\Sysnative\termserv.dll)
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "termsrv.dll");
@@ -101,15 +103,15 @@ namespace TermsrvPatcher
 
         public Patcher()
         {
-            termsrvPath = getTermsrvPath();
-            readFile();
+            TermsrvPath = GetTermsrvPath();
+            ReadFile();
         }
 
         /// <summary>
         /// Reads the content of the specified file into the buffer
         /// </summary>
         /// <param name="path"></param>
-        public void readFile(string path)
+        public void ReadFile(string path)
         {
             termsrvContent = File.ReadAllBytes(path);
         }
@@ -117,19 +119,19 @@ namespace TermsrvPatcher
         /// <summary>
         /// Reada the content of termsrv.dll into the buffer
         /// </summary>
-        public void readFile()
+        public void ReadFile()
         {
-            readFile(termsrvPath);
+            ReadFile(TermsrvPath);
         }
 
-        public int checkStatus(string find, string replace)
+        public int CheckStatus(string find, string replace)
         {
-            int[] findArr = strToIntArr(find);
-            byte[] replaceArr = strToByteArr(replace);
+            int[] findArr = StrToIntArr(find);
+            byte[] replaceArr = StrToByteArr(replace);
 
-            if (findPattern(replaceArr) == -1)
+            if (FindPattern(replaceArr) == -1)
             {
-                if (findPattern(findArr) == -1)
+                if (FindPattern(findArr) == -1)
                 {
                     // Patch status unknown
                     return -1;
@@ -147,22 +149,22 @@ namespace TermsrvPatcher
             }
         }
 
-        public void patch(string find, string replace)
+        public void Patch(string find, string replace)
         {
-            int[] findArr = strToIntArr(find);
-            int match = findPattern(findArr);
+            int[] findArr = StrToIntArr(find);
+            int match = FindPattern(findArr);
 
-            byte[] replaceArr = strToByteArr(replace);
-            int matchReplace = findPattern(replaceArr);
+            byte[] replaceArr = StrToByteArr(replace);
+            int matchReplace = FindPattern(replaceArr);
 
-            string backup = termsrvPath + "." + getVersion();
+            string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
             {
                 //textBlockMessages.Text += "Backup file...";
-                File.Copy(termsrvPath, backup);
+                File.Copy(TermsrvPath, backup);
                 //textBlockMessages.Text += " OK";
             }
-            FileInfo fi = new FileInfo(termsrvPath);
+            FileInfo fi = new FileInfo(TermsrvPath);
             long l = fi.Length;
 
             List<byte> binReplace = new List<byte>();
@@ -179,7 +181,7 @@ namespace TermsrvPatcher
             }
 
             EnableDevilMode();
-            using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
+            using (BinaryWriter writer = new BinaryWriter(File.Open(TermsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(match, SeekOrigin.Begin);
                 writer.Write(binReplace.ToArray());
@@ -187,22 +189,22 @@ namespace TermsrvPatcher
             DisableDevilMode();
 
             // Re-read contents to reflect actual patch status
-            readFile();
+            ReadFile();
         }
 
-        public void unpatch()
+        public void Unpatch()
         {
-            string backup = termsrvPath + "." + getVersion();
+            string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
             {
                 // Exception
             }
             // Read the unpatched file into the buffer
-            readFile(backup);
+            ReadFile(backup);
 
             EnableDevilMode();
             // Write the content of the unpatched file into termsrv.dll (insted of copying the file to maintain file permisions)
-            using (BinaryWriter writer = new BinaryWriter(File.Open(termsrvPath, FileMode.Open)))
+            using (BinaryWriter writer = new BinaryWriter(File.Open(TermsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(0, SeekOrigin.Begin);
                 writer.Write(termsrvContent);
@@ -210,10 +212,10 @@ namespace TermsrvPatcher
             DisableDevilMode();
 
             // Re-read contents to reflect actual patch status
-            readFile();
+            ReadFile();
         }
 
-        private int[] strToIntArr(string pattern)
+        private int[] StrToIntArr(string pattern)
         {
             int firstHex = -1;
             List<int> bin = new List<int>();
@@ -243,7 +245,7 @@ namespace TermsrvPatcher
             return bin.ToArray();
         }
 
-        private byte[] strToByteArr(string pattern)
+        private byte[] StrToByteArr(string pattern)
         {
             List<byte> bin = new List<byte>();
             foreach (string hex in pattern.Split(' '))
@@ -256,7 +258,7 @@ namespace TermsrvPatcher
             return bin.ToArray();
         }
 
-        private int findPattern(int[] searchPattern)
+        private int FindPattern(int[] searchPattern)
         {
             if (searchPattern.Length == 0)
             {
@@ -293,7 +295,7 @@ namespace TermsrvPatcher
             return matchPos;
         }
 
-        private int findPattern(byte[] searchPattern)
+        private int FindPattern(byte[] searchPattern)
         {
             if (searchPattern.Length == 0)
             {
@@ -324,9 +326,9 @@ namespace TermsrvPatcher
             return matchPos;
         }
 
-        public string getVersion()
+        public string GetVersion()
         {
-            return FileVersionInfo.GetVersionInfo(termsrvPath).ProductVersion;
+            return FileVersionInfo.GetVersionInfo(TermsrvPath).ProductVersion;
         }
     }
 }

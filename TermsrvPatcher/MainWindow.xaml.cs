@@ -16,7 +16,7 @@ namespace TermsrvPatcher
         {
             InitializeComponent();
             patcher = new Patcher();
-            if (patcher.allowRdp)
+            if (patcher.AllowRdp)
             {
                 radioButtonEnableRdp.IsChecked = true;
             }
@@ -24,7 +24,7 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableRdp.IsChecked = true;
             }
-            if (patcher.allowMulti)
+            if (patcher.AllowMulti)
             {
                 radioButtonEnableMulti.IsChecked = true;
             }
@@ -32,7 +32,7 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableMulti.IsChecked = true;
             }
-            if (patcher.allowBlank)
+            if (patcher.AllowBlank)
             {
                 radioButtonEnableBlank.IsChecked = true;
             }
@@ -40,36 +40,36 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
-            scrollviewerMessages.Content = "termsrv.dll version: " + patcher.getVersion() + Environment.NewLine;
+            scrollviewerMessages.Content = "termsrv.dll version: " + patcher.GetVersion() + Environment.NewLine;
             //checkBoxTestMode.IsChecked = true;
             //checkStatus();
         }
 
-        private void buttonPatch_Click(object sender, RoutedEventArgs e)
+        private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
-            patch();
-            checkStatus();
+            Patch();
+            CheckStatus();
         }
 
         private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
         {
-            unpatch();
-            checkStatus();
+            Unpatch();
+            CheckStatus();
         }
 
-        private void buttonSetRegistry_Click(object sender, RoutedEventArgs e)
+        private void ButtonSetRegistry_Click(object sender, RoutedEventArgs e)
         {
-            setRegistry();
+            SetRegistry();
         }
 
-        private void buttonCheckStatus_Click(object sender, RoutedEventArgs e)
+        private void ButtonCheckStatus_Click(object sender, RoutedEventArgs e)
         {
-            checkStatus();
+            CheckStatus();
         }
 
-        private void checkStatus()
+        private void CheckStatus()
         {
-            switch (patcher.checkStatus(textBoxFind.Text, textBoxReplace.Text))
+            switch (patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text))
             {
                 case 1:
                     scrollviewerMessages.Content += "Status: Patched";
@@ -84,7 +84,7 @@ namespace TermsrvPatcher
             scrollviewerMessages.Content += Environment.NewLine;
         }
 
-        private void patch()
+        private void Patch()
         {
             ServiceController sc = new ServiceController("TermService");
 
@@ -94,16 +94,16 @@ namespace TermsrvPatcher
             }
             sc.WaitForStatus(ServiceControllerStatus.Stopped);
 
-            if (patcher.checkStatus(textBoxFind.Text, textBoxReplace.Text) == 0)
+            if (patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text) == 0)
             {
-                patcher.patch(textBoxFind.Text, textBoxReplace.Text);
+                patcher.Patch(textBoxFind.Text, textBoxReplace.Text);
             }
 
             sc.Start();
             sc.WaitForStatus(ServiceControllerStatus.Running);
         }
 
-        private void unpatch()
+        private void Unpatch()
         {
             ServiceController sc = new ServiceController("TermService");
 
@@ -113,20 +113,20 @@ namespace TermsrvPatcher
             }
             sc.WaitForStatus(ServiceControllerStatus.Stopped);
 
-            patcher.unpatch();
+            patcher.Unpatch();
 
             sc.Start();
             sc.WaitForStatus(ServiceControllerStatus.Running);
         }
 
-        private void setRegistry()
+        private void SetRegistry()
         {
-            patcher.allowRdp = radioButtonEnableRdp.IsChecked.GetValueOrDefault();
-            patcher.allowMulti = radioButtonEnableMulti.IsChecked.GetValueOrDefault();
-            patcher.allowBlank = radioButtonEnableBlank.IsChecked.GetValueOrDefault();
+            patcher.AllowRdp = radioButtonEnableRdp.IsChecked.GetValueOrDefault();
+            patcher.AllowMulti = radioButtonEnableMulti.IsChecked.GetValueOrDefault();
+            patcher.AllowBlank = radioButtonEnableBlank.IsChecked.GetValueOrDefault();
         }
 
-        private void buttonTest_Click(object sender, RoutedEventArgs e)
+        private void ButtonTest_Click(object sender, RoutedEventArgs e)
         {
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
                 Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
