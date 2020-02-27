@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Diagnostics;
-using System.Security.Principal;
-using System.Security.AccessControl;
-using PrivilegeClass;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
-using Microsoft.Win32;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace TermsrvPatcher
@@ -108,12 +105,6 @@ namespace TermsrvPatcher
             readFile();
         }
 
-        public Patcher(string path)
-        {
-            termsrvPath = path;
-            readFile();
-        }
-
         /// <summary>
         /// Reads the content of the specified file into the buffer
         /// </summary>
@@ -138,7 +129,7 @@ namespace TermsrvPatcher
 
             if (findPattern(replaceArr) == -1)
             {
-                if(findPattern(findArr) == -1)
+                if (findPattern(findArr) == -1)
                 {
                     // Patch status unknown
                     return -1;
@@ -336,11 +327,6 @@ namespace TermsrvPatcher
         public string getVersion()
         {
             return FileVersionInfo.GetVersionInfo(termsrvPath).ProductVersion;
-        }
-
-        public IdentityReference getAdministratorsIdentity()
-        {
-            return new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null);
         }
     }
 }

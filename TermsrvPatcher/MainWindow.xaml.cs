@@ -1,10 +1,8 @@
-﻿using System.Windows;
-using System.IO;
-using System.Diagnostics;
+﻿using NetFwTypeLib;
 using System;
-using System.ServiceProcess;
-using NetFwTypeLib;
 using System.Linq;
+using System.ServiceProcess;
+using System.Windows;
 
 namespace TermsrvPatcher
 {
