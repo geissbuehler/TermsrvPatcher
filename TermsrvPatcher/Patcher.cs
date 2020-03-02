@@ -1,9 +1,11 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using NetFwTypeLib;
 
 namespace TermsrvPatcher
 {
@@ -160,9 +162,7 @@ namespace TermsrvPatcher
             string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
             {
-                //textBlockMessages.Text += "Backup file...";
                 File.Copy(TermsrvPath, backup);
-                //textBlockMessages.Text += " OK";
             }
             FileInfo fi = new FileInfo(TermsrvPath);
             long l = fi.Length;
@@ -329,6 +329,31 @@ namespace TermsrvPatcher
         public string GetVersion()
         {
             return FileVersionInfo.GetVersionInfo(TermsrvPath).ProductVersion;
+        }
+
+        public void SetFirewall(bool Enabled)
+        {
+            INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
+                Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+            System.Collections.Generic.IEnumerable<INetFwRule> rules;
+            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
+                x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN
+                && x.serviceName == "termservice"
+                && x.LocalPorts == "3389"
+            );
+            foreach (dynamic rule in rules)
+            {
+                rule.Enabled = Enabled;
+            }
+
+            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
+                x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN
+                && x.ApplicationName == "C:\\WINDOWS\\system32\\RdpSa.exe"
+            );
+            foreach (dynamic rule in rules)
+            {
+                rule.Enabled = Enabled;
+            }
         }
     }
 }

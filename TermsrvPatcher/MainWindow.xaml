@@ -17,23 +17,22 @@
         <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="211,132,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="66" Margin="10,10,0,0" VerticalAlignment="Top" Width="171" Grid.ColumnSpan="2">
             <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp"/>
-                <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp"/>
+                <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked"/>
+                <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked"/>
             </StackPanel>
         </GroupBox>
         <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="211,53,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1"/>
-        <Button x:Name="buttonSetRegistry" Content="Set Registry" HorizontalAlignment="Left" Margin="10,238,0,0" VerticalAlignment="Top" Width="75" Click="ButtonSetRegistry_Click" Grid.ColumnSpan="2"/>
         <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="211,24,0,0" VerticalAlignment="Top" Width="90" Click="ButtonCheckStatus_Click" Grid.Column="1"/>
         <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Height="68" Width="171" Grid.ColumnSpan="2">
             <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi"/>
-                <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi"/>
+                <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonDisableMulti_Checked"/>
+                <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonEnableMulti_Checked"/>
             </StackPanel>
         </GroupBox>
         <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,154,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="73" Width="171" Grid.ColumnSpan="2">
             <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank"/>
-                <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank"/>
+                <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonDisableBlank_Checked"/>
+                <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonEnableBlank_Checked"/>
             </StackPanel>
         </GroupBox>
         <Button x:Name="buttonTest" Content="Firewallcheck" Grid.Column="1" HorizontalAlignment="Left" Margin="317,24,0,0" VerticalAlignment="Top" Width="75" Click="ButtonTest_Click"/>
