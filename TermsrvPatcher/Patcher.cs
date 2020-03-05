@@ -177,7 +177,7 @@ namespace TermsrvPatcher
             }
             if (binReplace.Count == 0)
             {
-                // Exception
+                // TODO: Exception
             }
 
             EnableDevilMode();
@@ -194,16 +194,15 @@ namespace TermsrvPatcher
 
         public void Unpatch()
         {
-            string backup = TermsrvPath + "." + GetVersion();
-            if (!File.Exists(backup))
+            if (!BackupAvailable())
             {
-                // Exception
+                // TODO: Exception
             }
             // Read the unpatched file into the buffer
-            ReadFile(backup);
+            ReadFile(TermsrvPath + "." + GetVersion());
 
             EnableDevilMode();
-            // Write the content of the unpatched file into termsrv.dll (insted of copying the file to maintain file permisions)
+            // To maintain file permisions, write the content of the unpatched file into termsrv.dll (instead of copying the file)
             using (BinaryWriter writer = new BinaryWriter(File.Open(TermsrvPath, FileMode.Open)))
             {
                 writer.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -331,7 +330,12 @@ namespace TermsrvPatcher
             return FileVersionInfo.GetVersionInfo(TermsrvPath).ProductVersion;
         }
 
-        public void SetFirewall(bool Enabled)
+        public bool BackupAvailable()
+        {
+            return File.Exists(TermsrvPath + "." + GetVersion());
+        }
+
+        public void SetFirewall(bool enabled)
         {
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
                 Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
@@ -350,7 +354,7 @@ namespace TermsrvPatcher
             );
             foreach (dynamic rule in rules)
             {
-                rule.Enabled = Enabled;
+                rule.Enabled = enabled;
             }
         }
     }

@@ -13,6 +13,9 @@ namespace TermsrvPatcher
     {
         private Patcher patcher;
         private bool formInitialized = false;
+        private int status = -1;
+        private string version = "";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -41,7 +44,8 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
-            scrollviewerMessages.Content = "termsrv.dll version: " + patcher.GetVersion() + Environment.NewLine;
+            //scrollviewerMessages.Content = "termsrv.dll version: " + patcher.GetVersion() + Environment.NewLine;
+            CheckStatus();
             //checkBoxTestMode.IsChecked = true;
             //checkStatus();
             formInitialized = true;
@@ -64,21 +68,50 @@ namespace TermsrvPatcher
             CheckStatus();
         }
 
+        private void AddMessage(string message)
+        {
+            if (textBoxMessages.Text.Length > 0)
+            {
+                textBoxMessages.Text += Environment.NewLine + message;
+            }
+            else
+            {
+                textBoxMessages.Text += message;
+            }
+            textBoxMessages.ScrollToEnd();
+        }
+
         private void CheckStatus()
         {
-            switch (patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text))
+            version = patcher.GetVersion();
+            textBlockVersion.Text = "termsrv.dll version: " + version;
+            status = patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
+            switch (status)
             {
                 case 1:
-                    scrollviewerMessages.Content += "Status: Patched";
+                    textBlockStatus.Text = "termsrv.dll status: Patched";
+                    buttonUnpatch.IsEnabled = true;
+                    buttonPatch.IsEnabled = false;
                     break;
                 case 0:
-                    scrollviewerMessages.Content += "Status: Unpatched";
+                    textBlockStatus.Text = "termsrv.dll status: Unpatched";
+                    buttonUnpatch.IsEnabled = false;
+                    buttonPatch.IsEnabled = true;
                     break;
                 case -1:
-                    scrollviewerMessages.Content += "Status: Unkown";
+                    textBlockStatus.Text = "termsrv.dll status: Unkown";
+                    buttonUnpatch.IsEnabled = false;
+                    buttonPatch.IsEnabled = false;
                     break;
             }
-            scrollviewerMessages.Content += Environment.NewLine;
+            if (patcher.BackupAvailable())
+            {
+                textBlockBackupStatus.Text = "termsrv.dll backup: Available";
+            }
+            else
+            {
+                textBlockBackupStatus.Text = "termsrv.dll backup: Not available";
+            }
         }
 
         private void Patch()
