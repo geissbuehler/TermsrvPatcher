@@ -152,9 +152,9 @@ namespace TermsrvPatcher
                 //rule.Profiles = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN;
             }*/
 
-            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
+            /*rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
                 x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN //
-                                                                         // Exclude rules explicitly only for public networks (Windows 7 has a public and a private/domain RDP rule)
+                // Exclude rules explicitly only for public networks (Windows 7 has a public and a private/domain RDP rule)
                 && Convert.ToBoolean(x.Profiles & ((int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN))
                 && x.serviceName == "termservice" //
                 && x.LocalPorts == "3389" //
@@ -178,6 +178,24 @@ namespace TermsrvPatcher
                 // Exclude rules explicitly only for public networks (Windows 7 has a public and a private/domain RDP rule)
                 // Works!
                 //rule.Enabled = false;
+            }*/
+
+            // Group "Remotedesktop - RemoteFX" (Windows 7)
+            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
+                x.Grouping == "@FirewallAPI.dll,-28852"
+            );
+            foreach (dynamic rule in rules)
+            {
+                AddMessage(rule.Name);
+            }
+
+            // Group "Remotedesktop"
+            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
+                x.Grouping == "@FirewallAPI.dll,-28752"
+            );
+            foreach (dynamic rule in rules)
+            {
+                AddMessage(rule.Name);
             }
         }
 

@@ -336,19 +336,17 @@ namespace TermsrvPatcher
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
                 Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
             System.Collections.Generic.IEnumerable<INetFwRule> rules;
-            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
-                x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN
-                && x.serviceName == "termservice"
-                && x.LocalPorts == "3389"
-            );
-            foreach (dynamic rule in rules)
-            {
-                rule.Enabled = Enabled;
-            }
 
             rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
                 x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN
-                && x.ApplicationName == "C:\\WINDOWS\\system32\\RdpSa.exe"
+                // Exclude rules explicitly only for public networks (as seen on some systems)
+                && Convert.ToBoolean(x.Profiles & ((int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN))
+                && (
+                    // Group "Remotedesktop"
+                    x.Grouping == "@FirewallAPI.dll,-28752"
+                    // Group "Remotedesktop - RemoteFX" (Windows 7)
+                    || x.Grouping == "@FirewallAPI.dll,-28852"
+                )
             );
             foreach (dynamic rule in rules)
             {
