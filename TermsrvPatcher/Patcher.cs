@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using NetFwTypeLib;
+using System.ServiceProcess;
 
 namespace TermsrvPatcher
 {
@@ -149,6 +150,28 @@ namespace TermsrvPatcher
                 // Patched
                 return 1;
             }
+        }
+
+        public void StopTermService()
+        {
+            ServiceController sc = new ServiceController("TermService");
+
+            if (sc.Status == ServiceControllerStatus.Running)
+            {
+                sc.Stop();
+            }
+            sc.WaitForStatus(ServiceControllerStatus.Stopped);
+        }
+
+        public void StartTermService()
+        {
+            ServiceController sc = new ServiceController("TermService");
+
+            if (sc.Status == ServiceControllerStatus.Stopped)
+            {
+                sc.Start();
+            }
+            sc.WaitForStatus(ServiceControllerStatus.Running);
         }
 
         public void Patch(string find, string replace)
