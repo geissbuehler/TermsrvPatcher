@@ -81,7 +81,6 @@ namespace TermsrvPatcher
                     buttonPatch.IsEnabled = false;
                     break;
             }
-            buttonCheckStatus.IsEnabled = true;
             textBoxFind.IsEnabled = true;
             textBoxReplace.IsEnabled = true;
         }
@@ -100,6 +99,7 @@ namespace TermsrvPatcher
 
         private void ButtonCheckStatus_Click(object sender, RoutedEventArgs e)
         {
+            buttonCheckStatus.IsEnabled = false;
             CheckStatus();
         }
 
@@ -119,113 +119,35 @@ namespace TermsrvPatcher
         private void CheckStatus()
         {
             version = patcher.GetVersion();
-            textBlockVersion.Text = "termsrv.dll version: " + version;
-            status = patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
+            textBlockVersion.Text = "Version: " + version;
+            try
+            {
+                status = patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
+            }
+            catch (Exception exc)
+            {
+                AddMessage(exc.ToString());
+                status = -1;
+            }
             switch (status)
             {
                 case 1:
-                    textBlockStatus.Text = "termsrv.dll status: Patched";
+                    textBlockStatus.Text = "Status: Patched";
                     break;
                 case 0:
-                    textBlockStatus.Text = "termsrv.dll status: Unpatched";
+                    textBlockStatus.Text = "Status: Unpatched";
                     break;
                 case -1:
-                    textBlockStatus.Text = "termsrv.dll status: Unkown";
+                    textBlockStatus.Text = "Status: Unkown";
                     break;
             }
             if (patcher.BackupAvailable())
             {
-                textBlockBackupStatus.Text = "termsrv.dll backup: Available";
+                textBlockBackupStatus.Text = "Backup: Available";
             }
             else
             {
-                textBlockBackupStatus.Text = "termsrv.dll backup: Not available";
-            }
-        }
-
-        private void ButtonTest_Click(object sender, RoutedEventArgs e)
-        {
-            buttonTest.IsEnabled = false;
-            worker.RunWorkerAsync(argument: true);
-
-            INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(
-                Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-
-            /*var foo = firewallPolicy.Rules.OfType<INetFwRule>();
-            foreach (dynamic rule in foo)
-            {
-                dynamic bar = rule.Name;
-            }
-            INetFwRule firewallRule = firewallPolicy.Rules.OfType<INetFwRule>().Where(x => x.LocalPorts == "3389").FirstOrDefault();
-            dynamic baz = firewallRule.Name;*/
-
-            System.Collections.Generic.IEnumerable<INetFwRule> rules;
-
-            /*rules = firewallPolicy.Rules.OfType<INetFwRule>();
-            foreach (dynamic rule in rules)
-            {
-                if (rule.ApplicationName == "C:\\WINDOWS\\system32\\RdpSa.exe")
-                {
-                    //scrollviewerMessages.Content += rule.Name;
-                    //scrollviewerMessages.Content += Environment.NewLine;
-                }
-                if (rule.LocalPorts == "3389")
-                {
-                    //scrollviewerMessages.Content += Convert.ToString(rule.Direction);
-                    //scrollviewerMessages.Content += Convert.ToString(rule.Profiles);
-                    //scrollviewerMessages.Content += rule.Name;
-                    //scrollviewerMessages.Content += Environment.NewLine;
-                }
-                //scrollviewerMessages.Content += rule.serviceName;
-                //scrollviewerMessages.Content += Environment.NewLine;
-                int bazbaz = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_ALL;
-                //rule.Profiles = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN;
-            }*/
-
-            /*rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
-                x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN //
-                // Exclude rules explicitly only for public networks (Windows 7 has a public and a private/domain RDP rule)
-                && Convert.ToBoolean(x.Profiles & ((int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN))
-                && x.serviceName == "termservice" //
-                && x.LocalPorts == "3389" //
-            );
-            foreach (dynamic rule in rules)
-            {
-                scrollviewerMessages.Content += rule.Name;
-                scrollviewerMessages.Content += Environment.NewLine;
-            }
-
-            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
-                x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN
-                // Exclude rules explicitly only for public networks
-                && Convert.ToBoolean(x.Profiles & ((int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE | (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_DOMAIN))
-                && x.ApplicationName == "C:\\WINDOWS\\system32\\RdpSa.exe"
-            );
-            foreach (dynamic rule in rules)
-            {
-                scrollviewerMessages.Content += rule.Name;
-                scrollviewerMessages.Content += Environment.NewLine;
-                // Exclude rules explicitly only for public networks (Windows 7 has a public and a private/domain RDP rule)
-                // Works!
-                //rule.Enabled = false;
-            }*/
-
-            // Group "Remotedesktop - RemoteFX" (Windows 7)
-            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
-                x.Grouping == "@FirewallAPI.dll,-28852"
-            );
-            foreach (dynamic rule in rules)
-            {
-                AddMessage(rule.Name);
-            }
-
-            // Group "Remotedesktop"
-            rules = firewallPolicy.Rules.OfType<INetFwRule>().Where(x =>
-                x.Grouping == "@FirewallAPI.dll,-28752"
-            );
-            foreach (dynamic rule in rules)
-            {
-                AddMessage(rule.Name);
+                textBlockBackupStatus.Text = "Backup: Not available";
             }
         }
 
@@ -324,6 +246,22 @@ namespace TermsrvPatcher
             CheckStatus();
             AddMessage("New status: " + status);
             EnableControls();
+        }
+
+        private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                buttonCheckStatus.IsEnabled = true;
+            }
+        }
+
+        private void textBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                buttonCheckStatus.IsEnabled = true;
+            }
         }
     }
 }

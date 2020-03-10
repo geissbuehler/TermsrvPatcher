@@ -200,7 +200,7 @@ namespace TermsrvPatcher
             }
             if (binReplace.Count == 0)
             {
-                // TODO: Exception
+                // TODO: Throw useful exception here
             }
 
             EnableDevilMode();
@@ -219,7 +219,7 @@ namespace TermsrvPatcher
         {
             if (!BackupAvailable())
             {
-                // TODO: Exception
+                // TODO: Throw useful exception here
             }
             // Read the unpatched file into the buffer
             ReadFile(TermsrvPath + "." + GetVersion());
@@ -239,7 +239,6 @@ namespace TermsrvPatcher
 
         private int[] StrToIntArr(string pattern)
         {
-            int firstHex = -1;
             List<int> bin = new List<int>();
             foreach (string hex in pattern.Split(' '))
             {
@@ -251,18 +250,10 @@ namespace TermsrvPatcher
                     }
                     else
                     {
-                        if (firstHex == -1)
-                        {
-                            // Position of first non-astersik
-                            firstHex = bin.Count;
-                        }
                         bin.Add(Convert.ToInt32(hex, 16));
+                        // TODO: Catch exception here and raise ArgumentException that returns the string that failed to convert to hex
                     }
                 }
-            }
-            if (firstHex == -1)
-            {
-                return new int[] { };
             }
             return bin.ToArray();
         }

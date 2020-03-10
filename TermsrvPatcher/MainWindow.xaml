@@ -5,43 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TermsrvPatcher"
         mc:Ignorable="d"
-        Title="Remote Desktop Patcher" Height="350" Width="500">
+        Title="Remote Desktop Patcher" Height="400" Width="550" MinWidth="550" MinHeight="400">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="31*"/>
-            <ColumnDefinition Width="488*"/>
+            <ColumnDefinition Width="0*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="textBoxFind" Height="23" Margin="173.667,62,10.333,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" Text="39 81 3C 06 00 00 0F 84 5D 61 01 00"/>
-        <TextBox x:Name="textBoxReplace" Height="23" Margin="173.667,116,10.333,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" Text="B8 00 01 00 00 89 81 38 06 00 00 90"/>
-        <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="173.667,36,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="173.667,90,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="66" Margin="10,10,0,0" VerticalAlignment="Top" Width="171" Grid.ColumnSpan="2">
+        <TextBox x:Name="textBoxFind" Height="23" Margin="204,62,10.286,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" Text="39 81 3C 06 00 00 0F 84 5D 61 01 00" TextChanged="textBoxFind_TextChanged"/>
+        <TextBox x:Name="textBoxReplace" Height="23" Margin="204,116,10.286,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" Text="B8 00 01 00 00 89 81 38 06 00 00 90" TextChanged="textBoxReplace_TextChanged"/>
+        <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="204,36,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="35"/>
+        <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="204,90,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="54"/>
+        <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="70" Margin="10,10,0,0" VerticalAlignment="Top" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked"/>
-                <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked"/>
+                <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked" Margin="0,0,10.143,0"/>
+                <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="268.667,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1"/>
-        <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="173.667,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonCheckStatus_Click" Grid.Column="1"/>
-        <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Height="68" Width="171" Grid.ColumnSpan="2">
+        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="299,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1" Height="21"/>
+        <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="204,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonCheckStatus_Click" Grid.Column="1" Height="21" IsEnabled="False"/>
+        <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Height="70" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonDisableMulti_Checked"/>
-                <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonEnableMulti_Checked"/>
+                <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonDisableMulti_Checked" Margin="0,0,10.143,0"/>
+                <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonEnableMulti_Checked" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,154,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="73" Width="171" Grid.ColumnSpan="2">
-            <StackPanel Margin="10,10,-2,-12">
-                <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonDisableBlank_Checked"/>
-                <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonEnableBlank_Checked"/>
+        <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="70" Width="185" Grid.Column="1">
+            <StackPanel Margin="10,10,-1.857,-12.714">
+                <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonDisableBlank_Checked" Margin="0,0,10.714,0"/>
+                <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonEnableBlank_Checked" Margin="0,0,10.714,0"/>
             </StackPanel>
         </GroupBox>
-        <Button x:Name="buttonTest" Content="Firewallcheck" Grid.Column="1" HorizontalAlignment="Left" Margin="298.667,160,0,0" VerticalAlignment="Top" Width="75" Click="ButtonTest_Click"/>
-        <Button x:Name="buttonUnpatch" Content="Unpatch" Grid.Column="1" HorizontalAlignment="Left" Margin="363.667,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonUnpatch_Click"/>
-        <TextBlock x:Name="textBlockStatus" HorizontalAlignment="Left" Margin="10,274,0,0" TextWrapping="Wrap" Text="termsrv.dll status: " VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <TextBlock x:Name="textBlockVersion" HorizontalAlignment="Left" Margin="10,232,0,0" TextWrapping="Wrap" Text="termsrv.dll version: " VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <TextBlock x:Name="textBlockBackupStatus" HorizontalAlignment="Left" Margin="10,253,0,0" TextWrapping="Wrap" Text="termsrv.dll backup: " VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="textBoxMessages" Grid.Column="1" Margin="173.667,201,10.333,9.667" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
-        <Label x:Name="labelMessages" Content="Messages:" Grid.Column="1" HorizontalAlignment="Left" Margin="173.667,175,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="buttonUnpatch" Content="Unpatch" Grid.Column="1" HorizontalAlignment="Left" Margin="394,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonUnpatch_Click" Height="21"/>
+        <TextBox x:Name="textBoxMessages" Grid.Column="1" Margin="204,170,10.286,9.429" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+        <Label x:Name="labelMessages" Content="Messages:" Grid.Column="1" HorizontalAlignment="Left" Margin="204,144,0,0" VerticalAlignment="Top" Height="26" Width="64"/>
+        <GroupBox x:Name="groupBoxStatus" Grid.ColumnSpan="2" Header="termsrv.dll Status" HorizontalAlignment="Left" Height="83" Margin="10,235,0,0" VerticalAlignment="Top" Width="185">
+            <StackPanel Margin="10,10,-1.857,-12.857">
+                <TextBlock x:Name="textBlockVersion" TextWrapping="Wrap" Text="Version: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
+                <TextBlock x:Name="textBlockBackupStatus" TextWrapping="Wrap" Text="Backup: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
+                <TextBlock x:Name="textBlockStatus" TextWrapping="Wrap" Text="Status: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
+            </StackPanel>
+        </GroupBox>
 
     </Grid>
 </Window>
