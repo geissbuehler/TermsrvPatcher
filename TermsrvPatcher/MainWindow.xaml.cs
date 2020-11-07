@@ -14,7 +14,7 @@ namespace TermsrvPatcher
     {
         private Patcher patcher;
         private bool formInitialized = false;
-        private int status = -1;
+        Patcher.Status status = Patcher.Status.Unkown;
         private string version = "";
         private readonly BackgroundWorker worker = new BackgroundWorker();
 
@@ -68,15 +68,15 @@ namespace TermsrvPatcher
         {
             switch (status)
             {
-                case 1:
+                case Patcher.Status.Patched:
                     buttonUnpatch.IsEnabled = true;
                     buttonPatch.IsEnabled = false;
                     break;
-                case 0:
+                case Patcher.Status.Unpatched:
                     buttonUnpatch.IsEnabled = false;
                     buttonPatch.IsEnabled = true;
                     break;
-                case -1:
+                case Patcher.Status.Unkown:
                     buttonUnpatch.IsEnabled = false;
                     buttonPatch.IsEnabled = false;
                     break;
@@ -122,23 +122,23 @@ namespace TermsrvPatcher
             textBlockVersion.Text = "Version: " + version;
             try
             {
-                status = patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
+                status = (Patcher.Status) patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
             }
             catch (Exception exc)
             {
                 AddMessage(exc.ToString());
-                status = -1;
+                status = Patcher.Status.Unkown;
             }
             switch (status)
             {
-                case 1:
-                    textBlockStatus.Text = "Status: Patched";
+                case Patcher.Status.Patched:
+                    textBlockStatus.Text = "Status: " + Patcher.Status.Patched.ToString();
                     break;
-                case 0:
-                    textBlockStatus.Text = "Status: Unpatched";
+                case Patcher.Status.Unpatched:
+                    textBlockStatus.Text = "Status: " + Patcher.Status.Unpatched;
                     break;
-                case -1:
-                    textBlockStatus.Text = "Status: Unkown";
+                case Patcher.Status.Unkown:
+                    textBlockStatus.Text = "Status: " + Patcher.Status.Unkown;
                     break;
             }
             if (patcher.BackupAvailable())

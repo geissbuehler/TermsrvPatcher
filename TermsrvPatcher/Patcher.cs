@@ -15,6 +15,13 @@ namespace TermsrvPatcher
         private byte[] termsrvContent;
         public string TermsrvPath { get; }
 
+        public enum Status : int
+        {
+            Unkown = -1,
+            Unpatched = 0,
+            Patched = 1
+        };
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         static extern IntPtr LoadLibrary(string lpLibFileName);
 
@@ -127,7 +134,7 @@ namespace TermsrvPatcher
             ReadFile(TermsrvPath);
         }
 
-        public int CheckStatus(string find, string replace)
+        public Status CheckStatus(string find, string replace)
         {
             int[] findArr = StrToIntArr(find);
             byte[] replaceArr = StrToByteArr(replace);
@@ -137,18 +144,18 @@ namespace TermsrvPatcher
                 if (FindPattern(findArr) == -1)
                 {
                     // Patch status unknown
-                    return -1;
+                    return Status.Unkown;
                 }
                 else
                 {
                     // Unpatched
-                    return 0;
+                    return Status.Unpatched;
                 }
             }
             else
             {
                 // Patched
-                return 1;
+                return Status.Patched;
             }
         }
 
