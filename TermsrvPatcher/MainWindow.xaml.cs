@@ -243,6 +243,69 @@ namespace TermsrvPatcher
             SetControls();
         }
 
+        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                worker.ReportProgress(20, new object[] { "Stopping TermService...", false });
+                patcher.StopTermService();
+                worker.ReportProgress(40, new object[] { " Done", true });
+                if (Convert.ToBoolean((e.Argument as object[])[0]))
+                {
+                    //patch
+                    int[] find = (e.Argument as object[])[1] as int[];
+                    byte[] replace = (e.Argument as object[])[2] as byte[];
+                    if (patcher.CheckStatus(find, replace) == 0)
+                    {
+                        worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
+                        patcher.Patch(find, replace);
+                    }
+                }
+                else
+                {
+                    //unpatch
+                    worker.ReportProgress(60, new object[] { "Restoring termsrv.dll backup", false });
+                    patcher.Unpatch();
+                }
+                worker.ReportProgress(80, new object[] { "Starting TermService...", false });
+                patcher.StartTermService();
+                worker.ReportProgress(100, new object[] { " Done", true });
+            }
+            catch (Exception exception)
+            {
+                worker.ReportProgress(100, new object[] { exception.ToString(), false });
+            }
+        }
+
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            AddMessage((e.UserState as object[])[0] as string, Convert.ToBoolean((e.UserState as object[])[1]));
+        }
+
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            AddMessage("Old status: " + status);
+            CheckStatus();
+            AddMessage("New status: " + status);
+            SetControls();
+        }
+
+        private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                buttonCheckStatus.IsEnabled = true;
+            }
+        }
+
+        private void textBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                buttonCheckStatus.IsEnabled = true;
+            }
+        }
+
         private void RadioButtonEnableRdp_Checked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
@@ -290,85 +353,6 @@ namespace TermsrvPatcher
             if (formInitialized)
             {
                 patcher.AllowBlank = true;
-            }
-        }
-
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            try
-            {
-                worker.ReportProgress(20, new object[] { "Stopping TermService...", false });
-                patcher.StopTermService();
-                worker.ReportProgress(40, new object[] { " Done", true });
-                if (Convert.ToBoolean((e.Argument as object[])[0]))
-                {
-                    //patch
-                    int[] find = (e.Argument as object[])[1] as int[];
-                    byte[] replace = (e.Argument as object[])[2] as byte[];
-                    if (patcher.CheckStatus(find, replace) == 0)
-                    {
-                        worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
-                        patcher.Patch(find, replace);
-        private void RadioButtonEnableMulti_Checked(object sender, RoutedEventArgs e)
-        {
-            if (formInitialized)
-            {
-                patcher.AllowMulti = true;
-            }
-        }
-
-        private void RadioButtonDisableBlank_Checked(object sender, RoutedEventArgs e)
-        {
-            if (formInitialized)
-            {
-                patcher.AllowBlank = false;
-            }
-        }
-
-                    }
-                }
-                else
-                {
-                    //unpatch
-                    worker.ReportProgress(60, new object[] { "Restoring termsrv.dll backup", false });
-                    patcher.Unpatch();
-                }
-                worker.ReportProgress(80, new object[] { "Starting TermService...", false });
-                patcher.StartTermService();
-                worker.ReportProgress(100, new object[] { " Done", true });
-            }
-            catch (Exception exception)
-            {
-                worker.ReportProgress(100, new object[] { exception.ToString(), false });
-            }
-        }
-
-        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            AddMessage((e.UserState as object[])[0] as string, Convert.ToBoolean((e.UserState as object[])[1]));
-        }
-
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            AddMessage("Old status: " + status);
-            CheckStatus();
-            AddMessage("New status: " + status);
-            SetControls();
-        }
-
-        private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (formInitialized)
-            {
-                buttonCheckStatus.IsEnabled = true;
-            }
-        }
-
-        private void textBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (formInitialized)
-            {
-                buttonCheckStatus.IsEnabled = true;
             }
         }
 
