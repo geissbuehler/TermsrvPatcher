@@ -15,6 +15,8 @@ namespace TermsrvPatcher
         private byte[] termsrvContent;
         public string TermsrvPath { get; }
 
+        public const string Patchfile = "Patches.txt";
+
         public enum Status : int
         {
             Unkown = -1,
@@ -105,7 +107,70 @@ namespace TermsrvPatcher
             }
         }
 
-        public static string GetTermsrvPath()
+        public static List<Object> ReadPatchfile()
+        {
+            List<Object> patches = new List<Object>();
+            List<string> warnings = new List<string>();
+            string arch;
+            if (Environment.Is64BitProcess)
+            {
+                arch = "x64";
+            }
+            else
+            {
+                arch = "x86";
+            }
+
+            StreamReader file = new StreamReader(Patchfile);
+            ulong linecount = 0;
+            string line;
+            while ((line = file.ReadLine()) != null)
+            {
+                linecount++;
+                string trimmed = line.Trim();
+                // Skip empty lines and comments
+                if ((trimmed.Length == 0) || (trimmed.Substring(0, 1) == "#"))
+                {
+                    continue;
+                }
+                string[] patchinfo = trimmed.Split(',');
+                if (patchinfo.Length != 3)
+                {
+                    warnings.Add(String.Format("Element count not equal to 3 at line {0} in patchfile '{1}' ({2})", linecount, Patchfile, trimmed));
+                    continue;
+                }
+                if ((patchinfo[0].Trim() != "x64") && (patchinfo[0].Trim() != "x86"))
+                {
+                    warnings.Add(String.Format("Architecture '{0}' not equal to 'x86' or 'x64' at line {1} in patchfile '{2}'", patchinfo[0].Trim(), linecount, Patchfile));
+                    continue;
+                }
+                try
+                {
+                    int[] find = StrToIntArr(patchinfo[1]);
+                    try
+                    {
+                        byte[] replace = StrToByteArr(patchinfo[2]);
+                        if (patchinfo[0].Trim() == arch)
+                        {
+                            patches.Add(new List<Object> { find, replace });
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        warnings.Add(String.Format("Invalid 'find' hex string '{0}' at line {1} in patchfile '{2}'", patchinfo[1], linecount, Patchfile));
+                    }
+                }
+                catch (Exception)
+                {
+                    warnings.Add(String.Format("Invalid 'replace' hex string '{0}' at line {1} in patchfile '{2}'", patchinfo[2], linecount, Patchfile));
+                }
+            }
+            file.Close();
+
+            return new List<Object>() { patches, warnings };
+        }
+
+            public static string GetTermsrvPath()
         {
             // Be aware that the process must run in 64-bit mode on 64-bit systems (otherwise termserv.dll is only accessible via C:\Windows\Sysnative\termserv.dll)
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "termsrv.dll");
@@ -134,14 +199,11 @@ namespace TermsrvPatcher
             ReadFile(TermsrvPath);
         }
 
-        public Status CheckStatus(string find, string replace)
+        public Status CheckStatus(int[] find, byte[] replace)
         {
-            int[] findArr = StrToIntArr(find);
-            byte[] replaceArr = StrToByteArr(replace);
-
-            if (FindPattern(replaceArr) == -1)
+            if (FindPattern(replace) == -1)
             {
-                if (FindPattern(findArr) == -1)
+                if (FindPattern(find) == -1)
                 {
                     // Patch status unknown
                     return Status.Unkown;
@@ -181,13 +243,11 @@ namespace TermsrvPatcher
             sc.WaitForStatus(ServiceControllerStatus.Running);
         }
 
-        public void Patch(string find, string replace)
+        public void Patch(int[] find, byte[] replace)
         {
-            int[] findArr = StrToIntArr(find);
-            int match = FindPattern(findArr);
+            int match = FindPattern(find);
 
-            byte[] replaceArr = StrToByteArr(replace);
-            int matchReplace = FindPattern(replaceArr);
+            int matchReplace = FindPattern(replace);
 
             string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
@@ -198,12 +258,9 @@ namespace TermsrvPatcher
             long l = fi.Length;
 
             List<byte> binReplace = new List<byte>();
-            foreach (string hex in replace.Split(' '))
+            foreach (byte hex in replace)
             {
-                if (hex != System.String.Empty)
-                {
-                    binReplace.Add(System.Convert.ToByte(hex, 16));
-                }
+                binReplace.Add(hex);
             }
             if (binReplace.Count == 0)
             {
@@ -244,7 +301,7 @@ namespace TermsrvPatcher
             ReadFile();
         }
 
-        private int[] StrToIntArr(string pattern)
+        public static int[] StrToIntArr(string pattern)
         {
             List<int> bin = new List<int>();
             foreach (string hex in pattern.Split(' '))
@@ -265,7 +322,7 @@ namespace TermsrvPatcher
             return bin.ToArray();
         }
 
-        private byte[] StrToByteArr(string pattern)
+        public static byte[] StrToByteArr(string pattern)
         {
             List<byte> bin = new List<byte>();
             foreach (string hex in pattern.Split(' '))
@@ -276,6 +333,32 @@ namespace TermsrvPatcher
                 }
             }
             return bin.ToArray();
+        }
+
+        public static string IntArrToString(int[] data)
+        {
+            string pattern = "";
+            foreach (int integer in data)
+            {
+                if (pattern != "")
+                {
+                    pattern += " ";
+                }
+                if (integer == -1)
+                {
+                    pattern += "*";
+                }
+                else
+                {
+                    pattern += BitConverter.ToString(new byte[] { (byte)integer });
+                }
+            }
+            return pattern;
+        }
+
+        public static string ByteArrToString(byte[] data)
+        {
+            return BitConverter.ToString(data).Replace("-", " ");
         }
 
         private int FindPattern(int[] searchPattern)

@@ -4,6 +4,7 @@ using System.ServiceProcess;
 using System.ComponentModel;
 using System.Windows;
 using NetFwTypeLib;
+using System.Collections.Generic;
 
 namespace TermsrvPatcher
 {
@@ -51,7 +52,6 @@ namespace TermsrvPatcher
                 radioButtonDisableBlank.IsChecked = true;
             }
             CheckStatus();
-            EnableControls();
             formInitialized = true;
         }
 
@@ -62,9 +62,11 @@ namespace TermsrvPatcher
             buttonCheckStatus.IsEnabled = false;
             textBoxFind.IsEnabled = false;
             textBoxReplace.IsEnabled = false;
+            radioButtonAutoMode.IsEnabled = false;
+            radioButtonManualMode.IsEnabled = false;
         }
 
-        private void EnableControls()
+        private void SetControls()
         {
             switch (status)
             {
@@ -81,20 +83,56 @@ namespace TermsrvPatcher
                     buttonPatch.IsEnabled = false;
                     break;
             }
-            textBoxFind.IsEnabled = true;
-            textBoxReplace.IsEnabled = true;
+            if (radioButtonAutoMode.IsChecked == true)
+            {
+                textBoxFind.IsEnabled = false;
+                textBoxReplace.IsEnabled = false;
+            }
+            else
+            {
+                textBoxFind.IsEnabled = true;
+                textBoxReplace.IsEnabled = true;
+            }
+            radioButtonAutoMode.IsEnabled = true;
+            radioButtonManualMode.IsEnabled = true;
+        }
+
+        private bool CheckRdpSession()
+        {
+            if (System.Windows.Forms.SystemInformation.TerminalServerSession)
+            {
+                var result = System.Windows.Forms.MessageBox.Show("The current remote desktop session will be disconnected. Continue?", "RDP session detected", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+                if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
         }
 
         private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
-            DisableControls();
-            worker.RunWorkerAsync(argument: new object[] { true, textBoxFind.Text, textBoxReplace.Text });
-         }
+            if (CheckRdpSession())
+            {
+                DisableControls();
+                worker.RunWorkerAsync(argument: new object[] { true, Patcher.StrToIntArr(textBoxFind.Text), Patcher.StrToByteArr(textBoxReplace.Text) });
+            }
+        }
 
         private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
         {
-            DisableControls();
-            worker.RunWorkerAsync(argument: new object[] { false });
+            if (CheckRdpSession())
+            {
+                DisableControls();
+                worker.RunWorkerAsync(argument: new object[] { false });
+            }
         }
 
         private void ButtonCheckStatus_Click(object sender, RoutedEventArgs e)
@@ -119,15 +157,68 @@ namespace TermsrvPatcher
         private void CheckStatus()
         {
             version = patcher.GetVersion();
+            bool success = false;
             textBlockVersion.Text = "Version: " + version;
-            try
+            if (radioButtonAutoMode.IsChecked == true)
             {
-                status = (Patcher.Status) patcher.CheckStatus(textBoxFind.Text, textBoxReplace.Text);
+                List<object> patches = new List<object>();
+                try
+                {
+                    List<object> res = Patcher.ReadPatchfile();
+                    patches = (List<object>)res[0];
+                    List<string> warnings = (List<string>)res[1];
+                    foreach (string warning in warnings)
+                    {
+                        AddMessage("Warning: " + warning);
+                    }
+                    success = true;
+                }
+                catch (System.IO.FileNotFoundException)
+                {
+                    AddMessage(String.Format("Error: patchfile '{0}' not found, prepare '{0}' or enter patches manually", Patcher.Patchfile));
+                }
+                catch (Exception exception)
+                {
+                    AddMessage(String.Format("Error: Reading patchfile '{0}' failed, fix '{0}' or enter patches manually ({1})", Patcher.Patchfile, exception.Message.ToString()));
+                }
+                if (success)
+                {
+                    bool nomatch = true;
+                    foreach (List<Object> patch in patches)
+                    {
+                        status = patcher.CheckStatus((int[])patch[0], (byte[])patch[1]);
+                        if (status != Patcher.Status.Unkown)
+                        {
+                            textBoxFind.Text = Patcher.IntArrToString((int[])patch[0]);
+                            textBoxReplace.Text = Patcher.ByteArrToString((byte[])patch[1]);
+                            nomatch = false;
+                            break;
+                        }
+                    }
+                    if (nomatch)
+                    {
+                        AddMessage(String.Format("Error: No matching patch found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
+                    }
+                    else
+                    {
+                        AddMessage(String.Format("Matching patch in patchfile '{0}' found, automatic patching possible", Patcher.Patchfile));
+                    }
+                }
+                else
+                {
+                    status = Patcher.Status.Unkown;
+                }
             }
-            catch (Exception exc)
+            else
             {
-                AddMessage(exc.ToString());
-                status = Patcher.Status.Unkown;
+                if ((Patcher.StrToIntArr(textBoxFind.Text).Length > 5) && Patcher.StrToByteArr(textBoxReplace.Text).Length > 5)
+                {
+                    status = patcher.CheckStatus(Patcher.StrToIntArr(textBoxFind.Text), Patcher.StrToByteArr(textBoxReplace.Text));
+                }
+                else
+                {
+                    status = Patcher.Status.Unkown;
+                }
             }
             switch (status)
             {
@@ -149,6 +240,7 @@ namespace TermsrvPatcher
             {
                 textBlockBackupStatus.Text = "Backup: Not available";
             }
+            SetControls();
         }
 
         private void RadioButtonEnableRdp_Checked(object sender, RoutedEventArgs e)
@@ -211,12 +303,28 @@ namespace TermsrvPatcher
                 if (Convert.ToBoolean((e.Argument as object[])[0]))
                 {
                     //patch
-                    string find = (e.Argument as object[])[1] as string;
-                    string replace = (e.Argument as object[])[2] as string;
+                    int[] find = (e.Argument as object[])[1] as int[];
+                    byte[] replace = (e.Argument as object[])[2] as byte[];
                     if (patcher.CheckStatus(find, replace) == 0)
                     {
                         worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
                         patcher.Patch(find, replace);
+        private void RadioButtonEnableMulti_Checked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                patcher.AllowMulti = true;
+            }
+        }
+
+        private void RadioButtonDisableBlank_Checked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                patcher.AllowBlank = false;
+            }
+        }
+
                     }
                 }
                 else
@@ -229,9 +337,9 @@ namespace TermsrvPatcher
                 patcher.StartTermService();
                 worker.ReportProgress(100, new object[] { " Done", true });
             }
-            catch (Exception exc)
+            catch (Exception exception)
             {
-                worker.ReportProgress(100, new object[] { exc.ToString(), false });
+                worker.ReportProgress(100, new object[] { exception.ToString(), false });
             }
         }
 
@@ -245,7 +353,7 @@ namespace TermsrvPatcher
             AddMessage("Old status: " + status);
             CheckStatus();
             AddMessage("New status: " + status);
-            EnableControls();
+            SetControls();
         }
 
         private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -261,6 +369,22 @@ namespace TermsrvPatcher
             if (formInitialized)
             {
                 buttonCheckStatus.IsEnabled = true;
+            }
+        }
+
+        private void radioButtonAutoMode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                CheckStatus();
+            }
+        }
+
+        private void radioButtonManualMode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                CheckStatus();
             }
         }
     }
