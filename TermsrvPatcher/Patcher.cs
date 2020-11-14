@@ -107,6 +107,48 @@ namespace TermsrvPatcher
             }
         }
 
+        public static List<object> StringsToPatch(string findstrings, string replacestrings)
+        {
+            string[] findstr = findstrings.Split('|');
+            string[] replacestr = replacestrings.Split('|');
+            if (findstr.Length != replacestr.Length)
+            {
+                throw new Exception(String.Format("Hex sub-string count not equal for 'find' and 'replace' hex strings '{0}' and '{1}'", findstrings.Trim(), replacestrings.Trim()));
+            }
+            List<object> patch = new List<object>();
+            for (int count = 0; count < findstr.Length; count++)
+            {
+                int[] find;
+                byte[] replace;
+                try
+                {
+                    find = StrToIntArr(findstr[count]);
+                }
+                catch
+                {
+                    throw new Exception(String.Format("Invalid 'find' hex sub-string '{0}'", findstr[count].Trim()));
+                }
+                try
+                {
+                    replace = StrToByteArr(replacestr[count]);
+                }
+                catch
+                {
+                    throw new Exception(String.Format("Invalid 'replace' hex sub-string '{0}'", replacestr[count].Trim()));
+                }
+                if (find.Length != replace.Length)
+                {
+                    throw new Exception(String.Format("Element count in 'find' hex string '{0}' differs from element count in 'replace' hex string '{1}'", findstr[count].Trim(), replacestr[count].Trim()));
+                }
+                if (find.Length < 4)
+                {
+                    throw new Exception(String.Format("Element count in 'find' hex string '{0}' and 'replace' hex string '{1}' lower than 4", findstr[count].Trim(), replacestr[count].Trim()));
+                }
+                patch.Add(new List<Object> { find, replace });
+            }
+            return patch;
+        }
+
         public static List<Object> ReadPatchfile()
         {
             List<Object> patches = new List<Object>();
@@ -144,25 +186,19 @@ namespace TermsrvPatcher
                     warnings.Add(String.Format("Architecture '{0}' not equal to 'x86' or 'x64' at line {1} in patchfile '{2}'", patchinfo[0].Trim(), linecount, Patchfile));
                     continue;
                 }
+                List<object> patch;
                 try
                 {
-                    int[] find = StrToIntArr(patchinfo[1]);
-                    try
-                    {
-                        byte[] replace = StrToByteArr(patchinfo[2]);
-                        if (patchinfo[0].Trim() == arch)
-                        {
-                            patches.Add(new List<Object> { find, replace });
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        warnings.Add(String.Format("Invalid 'find' hex string '{0}' at line {1} in patchfile '{2}'", patchinfo[1], linecount, Patchfile));
-                    }
+                    patch = StringsToPatch(patchinfo[1], patchinfo[2]);
                 }
-                catch (Exception)
+                catch (Exception exception)
                 {
-                    warnings.Add(String.Format("Invalid 'replace' hex string '{0}' at line {1} in patchfile '{2}'", patchinfo[2], linecount, Patchfile));
+                    warnings.Add(String.Format("{0} at line {1} in patchfile '{2}'", exception.Message.ToString(), linecount, Patchfile));
+                    continue;
+                }
+                if (patchinfo[0].Trim() == arch)
+                {
+                    patches.Add(new List<object>() { patch, linecount });
                 }
             }
             file.Close();
@@ -199,26 +235,53 @@ namespace TermsrvPatcher
             ReadFile(TermsrvPath);
         }
 
-        public Status CheckStatus(int[] find, byte[] replace)
+        public Status CheckStatus(List<object> patch)
         {
-            if (FindPattern(replace) == -1)
+            Status status = Status.Unkown;
+            foreach (List<object> subpatch in patch)
             {
-                if (FindPattern(find) == -1)
+                int[] find = (int[])subpatch[0];
+                byte[] replace = (byte[])subpatch[1];
+                if (FindPattern(replace) == -1)
                 {
-                    // Patch status unknown
-                    return Status.Unkown;
+                    // Replace pattern not found
+                    if (FindPattern(find) == -1)
+                    {
+                        // Find pattern not found
+                        status = Status.Unkown;
+                        break;
+                    }
+                    else
+                    {
+                        // Find pattern found
+                        if (status == Status.Patched)
+                        {
+                            // Opposite result compared to previous loop
+                            status = Status.Unkown;
+                            break;
+                        }
+                        else
+                        {
+                            status = Status.Unpatched;
+                        }
+                    }
                 }
                 else
                 {
-                    // Unpatched
-                    return Status.Unpatched;
+                    // Replace pattern found
+                    if (status == Status.Unpatched)
+                    {
+                        // Opposite result compared to previous loop
+                        status = Status.Unkown;
+                        break;
+                    }
+                    else
+                    {
+                        status = Status.Patched;
+                    }
                 }
             }
-            else
-            {
-                // Patched
-                return Status.Patched;
-            }
+            return status;
         }
 
         public void StopTermService()
@@ -243,35 +306,42 @@ namespace TermsrvPatcher
             sc.WaitForStatus(ServiceControllerStatus.Running);
         }
 
-        public void Patch(int[] find, byte[] replace)
+        public void Patch(List<object> patch)
         {
-            int match = FindPattern(find);
-
-            int matchReplace = FindPattern(replace);
-
             string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
             {
                 File.Copy(TermsrvPath, backup);
             }
-            FileInfo fi = new FileInfo(TermsrvPath);
-            long l = fi.Length;
-
-            List<byte> binReplace = new List<byte>();
-            foreach (byte hex in replace)
-            {
-                binReplace.Add(hex);
-            }
-            if (binReplace.Count == 0)
-            {
-                // TODO: Throw useful exception here
-            }
+            //FileInfo fi = new FileInfo(TermsrvPath);
+            //long l = fi.Length;
 
             EnableDevilMode();
-            using (BinaryWriter writer = new BinaryWriter(File.Open(TermsrvPath, FileMode.Open)))
+            foreach (List<object> subpatch in patch)
             {
-                writer.BaseStream.Seek(match, SeekOrigin.Begin);
-                writer.Write(binReplace.ToArray());
+                int[] find = subpatch[0] as int[];
+                byte[] replace = subpatch[1] as byte[];
+                int match = FindPattern(find);
+
+                //int matchReplace = FindPattern(replace);
+
+
+                List<byte> binReplace = new List<byte>();
+                foreach (byte hex in replace)
+                {
+                    binReplace.Add(hex);
+                }
+                if (binReplace.Count == 0)
+                {
+                    //DisableDevilMode();
+                    // TODO: Throw useful exception here
+                }
+
+                using (BinaryWriter writer = new BinaryWriter(File.Open(TermsrvPath, FileMode.Open)))
+                {
+                    writer.BaseStream.Seek(match, SeekOrigin.Begin);
+                    writer.Write(binReplace.ToArray());
+                }
             }
             DisableDevilMode();
 

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.ServiceProcess;
 using System.ComponentModel;
 using System.Windows;
-using NetFwTypeLib;
 using System.Collections.Generic;
 
 namespace TermsrvPatcher
@@ -122,7 +119,7 @@ namespace TermsrvPatcher
             if (CheckRdpSession())
             {
                 DisableControls();
-                worker.RunWorkerAsync(argument: new object[] { true, Patcher.StrToIntArr(textBoxFind.Text), Patcher.StrToByteArr(textBoxReplace.Text) });
+                worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
             }
         }
 
@@ -186,22 +183,29 @@ namespace TermsrvPatcher
                     bool nomatch = true;
                     foreach (List<Object> patch in patches)
                     {
-                        status = patcher.CheckStatus((int[])patch[0], (byte[])patch[1]);
+                        status = patcher.CheckStatus(patch[0] as List<object>);
                         if (status != Patcher.Status.Unkown)
                         {
-                            textBoxFind.Text = Patcher.IntArrToString((int[])patch[0]);
-                            textBoxReplace.Text = Patcher.ByteArrToString((byte[])patch[1]);
+                            textBoxFind.Text = "";
+                            textBoxReplace.Text = "";
+                            foreach (List<object> subpatch in patch[0] as List<object>)
+                            {
+                                if (textBoxFind.Text != "")
+                                {
+                                    textBoxFind.Text += " | ";
+                                    textBoxReplace.Text += " | ";
+                                }
+                                textBoxFind.Text += Patcher.IntArrToString(subpatch[0] as int[]);
+                                textBoxReplace.Text += Patcher.ByteArrToString(subpatch[1] as byte[]);
+                            }
                             nomatch = false;
+                            AddMessage(String.Format("Matching patch in patchfile '{0}' found at line {1}, automatic patching enabled", Patcher.Patchfile, (ulong)patch[1]));
                             break;
                         }
                     }
                     if (nomatch)
                     {
                         AddMessage(String.Format("Error: No matching patch found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
-                    }
-                    else
-                    {
-                        AddMessage(String.Format("Matching patch in patchfile '{0}' found, automatic patching possible", Patcher.Patchfile));
                     }
                 }
                 else
@@ -211,13 +215,14 @@ namespace TermsrvPatcher
             }
             else
             {
-                if ((Patcher.StrToIntArr(textBoxFind.Text).Length > 5) && Patcher.StrToByteArr(textBoxReplace.Text).Length > 5)
+                try
                 {
-                    status = patcher.CheckStatus(Patcher.StrToIntArr(textBoxFind.Text), Patcher.StrToByteArr(textBoxReplace.Text));
+                    status = patcher.CheckStatus(Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text));
                 }
-                else
+                catch (Exception exception)
                 {
                     status = Patcher.Status.Unkown;
+                    AddMessage(String.Format("Error: {0}", exception.Message.ToString()));
                 }
             }
             switch (status)
@@ -253,12 +258,11 @@ namespace TermsrvPatcher
                 if (Convert.ToBoolean((e.Argument as object[])[0]))
                 {
                     //patch
-                    int[] find = (e.Argument as object[])[1] as int[];
-                    byte[] replace = (e.Argument as object[])[2] as byte[];
-                    if (patcher.CheckStatus(find, replace) == 0)
+                    List<object> patch = (e.Argument as object[])[1] as List<object>;
+                    if (patcher.CheckStatus(patch) == Patcher.Status.Unpatched)
                     {
                         worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
-                        patcher.Patch(find, replace);
+                        patcher.Patch(patch);
                     }
                 }
                 else
