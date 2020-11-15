@@ -56,7 +56,6 @@ namespace TermsrvPatcher
         {
             buttonPatch.IsEnabled = false;
             buttonUnpatch.IsEnabled = false;
-            buttonCheckStatus.IsEnabled = false;
             textBoxFind.IsEnabled = false;
             textBoxReplace.IsEnabled = false;
             radioButtonAutoMode.IsEnabled = false;
@@ -68,17 +67,22 @@ namespace TermsrvPatcher
             switch (status)
             {
                 case Patcher.Status.Patched:
-                    buttonUnpatch.IsEnabled = true;
                     buttonPatch.IsEnabled = false;
                     break;
                 case Patcher.Status.Unpatched:
-                    buttonUnpatch.IsEnabled = false;
                     buttonPatch.IsEnabled = true;
                     break;
                 case Patcher.Status.Unkown:
-                    buttonUnpatch.IsEnabled = false;
                     buttonPatch.IsEnabled = false;
                     break;
+            }
+            if (patcher.BackupAvailable())
+            {
+                buttonUnpatch.IsEnabled = true;
+            }
+            else
+            {
+                buttonUnpatch.IsEnabled = false;
             }
             if (radioButtonAutoMode.IsChecked == true)
             {
@@ -132,12 +136,6 @@ namespace TermsrvPatcher
             }
         }
 
-        private void ButtonCheckStatus_Click(object sender, RoutedEventArgs e)
-        {
-            buttonCheckStatus.IsEnabled = false;
-            CheckStatus();
-        }
-
         private void AddMessage(string message, bool appendLine = false)
         {
             if ((textBoxMessages.Text.Length) > 0 && (!appendLine))
@@ -153,6 +151,7 @@ namespace TermsrvPatcher
 
         private void CheckStatus()
         {
+            textBoxMessages.Clear();
             version = patcher.GetVersion();
             bool success = false;
             textBlockVersion.Text = "Version: " + version;
@@ -199,7 +198,7 @@ namespace TermsrvPatcher
                                 textBoxReplace.Text += Patcher.ByteArrToString(subpatch[1] as byte[]);
                             }
                             nomatch = false;
-                            AddMessage(String.Format("Matching patch in patchfile '{0}' found at line {1}, automatic patching enabled", Patcher.Patchfile, (ulong)patch[1]));
+                            AddMessage(String.Format("Automatic patching enabled: Matching patch in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)patch[1]));
                             break;
                         }
                     }
@@ -296,17 +295,17 @@ namespace TermsrvPatcher
 
         private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (formInitialized)
+            if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
-                buttonCheckStatus.IsEnabled = true;
+                CheckStatus();
             }
         }
 
         private void textBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if (formInitialized)
+            if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
-                buttonCheckStatus.IsEnabled = true;
+                CheckStatus();
             }
         }
 

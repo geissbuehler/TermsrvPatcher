@@ -21,8 +21,7 @@
                 <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="299,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1" Height="21"/>
-        <Button x:Name="buttonCheckStatus" Content="Check Status" HorizontalAlignment="Left" Margin="204,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonCheckStatus_Click" Grid.Column="1" Height="21" IsEnabled="False"/>
+        <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="204,9,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1" Height="21"/>
         <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Height="70" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
                 <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonDisableMulti_Checked" Margin="0,0,10.143,0"/>
@@ -35,7 +34,7 @@
                 <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonEnableBlank_Checked" Margin="0,0,10.714,0"/>
             </StackPanel>
         </GroupBox>
-        <Button x:Name="buttonUnpatch" Content="Unpatch" Grid.Column="1" HorizontalAlignment="Left" Margin="394,10,0,0" VerticalAlignment="Top" Width="90" Click="ButtonUnpatch_Click" Height="21"/>
+        <Button x:Name="buttonUnpatch" Content="Restore Backup" Grid.Column="1" HorizontalAlignment="Left" Margin="314,9,0,0" VerticalAlignment="Top" Width="90" Click="ButtonUnpatch_Click" Height="21"/>
         <TextBox x:Name="textBoxMessages" Grid.Column="1" Margin="204,190,10,9" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
         <Label x:Name="labelMessages" Content="Messages:" Grid.Column="1" HorizontalAlignment="Left" Margin="204,164,0,0" VerticalAlignment="Top" Height="26" Width="64"/>
         <GroupBox x:Name="groupBoxStatus" Grid.ColumnSpan="2" Header="termsrv.dll Status" HorizontalAlignment="Left" Height="83" Margin="10,235,0,0" VerticalAlignment="Top" Width="185">
@@ -45,8 +44,8 @@
                 <TextBlock x:Name="textBlockStatus" TextWrapping="Wrap" Text="Status: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="359,36,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
-        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,36,0,0" VerticalAlignment="Top" GroupName="PatchMode" IsChecked="True" Checked="radioButtonAutoMode_Checked"/>
+        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,41,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
+        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,41,0,0" VerticalAlignment="Top" GroupName="PatchMode" IsChecked="True" Checked="radioButtonAutoMode_Checked"/>
 
     </Grid>
 </Window>
