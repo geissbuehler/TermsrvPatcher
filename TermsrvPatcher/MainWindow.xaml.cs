@@ -198,13 +198,13 @@ namespace TermsrvPatcher
                                 textBoxReplace.Text += Patcher.ByteArrToString((byte[])subpatch[1]);
                             }
                             nomatch = false;
-                            AddMessage(String.Format("Automatic patching enabled: Matching patch in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)patch[1]));
+                            AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)patch[1]));
                             break;
                         }
                     }
                     if (nomatch)
                     {
-                        AddMessage(String.Format("Error: No matching patch found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
+                        AddMessage(String.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
                     }
                 }
                 else
@@ -217,6 +217,14 @@ namespace TermsrvPatcher
                 try
                 {
                     status = patcher.CheckStatus(Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text));
+                    if (status == Patcher.Status.Unkown)
+                    {
+                        AddMessage("Error: No match in termsrv.dll found for manual patch patterns");
+                    }
+                    else
+                    {
+                        AddMessage("Success: Match in termsrv.dll found for manual patch patterns");
+                    }
                 }
                 catch (Exception exception)
                 {

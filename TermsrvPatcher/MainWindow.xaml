@@ -13,8 +13,8 @@
         </Grid.ColumnDefinitions>
         <TextBox x:Name="textBoxFind" Height="23" Margin="204,82,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="textBoxFind_TextChanged"/>
         <TextBox x:Name="textBoxReplace" Height="23" Margin="204,136,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="textBoxReplace_TextChanged"/>
-        <Label x:Name="labelFind" Content="Find:" HorizontalAlignment="Left" Margin="204,56,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="35"/>
-        <Label x:Name="labelReplace" Content="Replace:" HorizontalAlignment="Left" Margin="204,110,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="54"/>
+        <Label x:Name="labelFind" Content="Find Pattern:" HorizontalAlignment="Left" Margin="204,56,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
+        <Label x:Name="labelReplace" Content="Replace Pattern:" HorizontalAlignment="Left" Margin="204,110,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
         <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="70" Margin="10,10,0,0" VerticalAlignment="Top" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
                 <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked" Margin="0,0,10.143,0"/>
@@ -44,8 +44,8 @@
                 <TextBlock x:Name="textBlockStatus" TextWrapping="Wrap" Text="Status: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,41,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
-        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,41,0,0" VerticalAlignment="Top" GroupName="PatchMode" IsChecked="True" Checked="radioButtonAutoMode_Checked"/>
+        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
+        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" IsChecked="True" Checked="radioButtonAutoMode_Checked"/>
 
     </Grid>
 </Window>

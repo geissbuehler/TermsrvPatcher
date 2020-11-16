@@ -12,10 +12,11 @@ namespace TermsrvPatcher
 {
     class Patcher
     {
+        public const string Patchfile = "Patches.txt";
+        public const int MinByteCount = 4;
+
         private byte[] termsrvContent;
         public string TermsrvPath { get; }
-
-        public const string Patchfile = "Patches.txt";
 
         public enum Status : int
         {
@@ -140,9 +141,9 @@ namespace TermsrvPatcher
                 {
                     throw new Exception(String.Format("Element count in 'find' hex string '{0}' differs from element count in 'replace' hex string '{1}'", findstr[count].Trim(), replacestr[count].Trim()));
                 }
-                if (find.Length < 4)
+                if (find.Length < MinByteCount)
                 {
-                    throw new Exception(String.Format("Element count in 'find' hex string '{0}' and 'replace' hex string '{1}' lower than 4", findstr[count].Trim(), replacestr[count].Trim()));
+                    throw new Exception(String.Format("Element count in 'find' hex string '{0}' and 'replace' hex string '{1}' less than {2}", findstr[count].Trim(), replacestr[count].Trim(), MinByteCount));
                 }
                 patch.Add(new List<Object> { find, replace });
             }
