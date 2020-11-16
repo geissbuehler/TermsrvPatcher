@@ -319,8 +319,8 @@ namespace TermsrvPatcher
             EnableDevilMode();
             foreach (List<object> subpatch in patch)
             {
-                int[] find = subpatch[0] as int[];
-                byte[] replace = subpatch[1] as byte[];
+                int[] find = (int[])subpatch[0];
+                byte[] replace = (byte[])subpatch[1];
                 int match = FindPattern(find);
 
                 //int matchReplace = FindPattern(replace);

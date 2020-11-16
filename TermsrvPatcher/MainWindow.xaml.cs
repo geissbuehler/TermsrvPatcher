@@ -182,20 +182,20 @@ namespace TermsrvPatcher
                     bool nomatch = true;
                     foreach (List<Object> patch in patches)
                     {
-                        status = patcher.CheckStatus(patch[0] as List<object>);
+                        status = patcher.CheckStatus((List<object>)patch[0]);
                         if (status != Patcher.Status.Unkown)
                         {
                             textBoxFind.Text = "";
                             textBoxReplace.Text = "";
-                            foreach (List<object> subpatch in patch[0] as List<object>)
+                            foreach (List<object> subpatch in (List<object>)patch[0])
                             {
                                 if (textBoxFind.Text != "")
                                 {
                                     textBoxFind.Text += " | ";
                                     textBoxReplace.Text += " | ";
                                 }
-                                textBoxFind.Text += Patcher.IntArrToString(subpatch[0] as int[]);
-                                textBoxReplace.Text += Patcher.ByteArrToString(subpatch[1] as byte[]);
+                                textBoxFind.Text += Patcher.IntArrToString((int[])subpatch[0]);
+                                textBoxReplace.Text += Patcher.ByteArrToString((byte[])subpatch[1]);
                             }
                             nomatch = false;
                             AddMessage(String.Format("Automatic patching enabled: Matching patch in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)patch[1]));
@@ -254,10 +254,10 @@ namespace TermsrvPatcher
                 worker.ReportProgress(20, new object[] { "Stopping TermService...", false });
                 patcher.StopTermService();
                 worker.ReportProgress(40, new object[] { " Done", true });
-                if (Convert.ToBoolean((e.Argument as object[])[0]))
+                if (Convert.ToBoolean(((object[])e.Argument)[0]))
                 {
                     //patch
-                    List<object> patch = (e.Argument as object[])[1] as List<object>;
+                    List<object> patch = (List<object>)((object[])e.Argument)[1];
                     if (patcher.CheckStatus(patch) == Patcher.Status.Unpatched)
                     {
                         worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
@@ -282,7 +282,7 @@ namespace TermsrvPatcher
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            AddMessage((e.UserState as object[])[0] as string, Convert.ToBoolean((e.UserState as object[])[1]));
+            AddMessage((string)((object[])e.UserState)[0], Convert.ToBoolean(((object[])e.UserState)[1]));
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
