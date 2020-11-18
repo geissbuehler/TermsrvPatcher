@@ -70,6 +70,25 @@ namespace TermsrvPatcher
             }
         }
 
+        public bool EnableNla
+        {
+            get
+            {
+                return Registry.GetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp", "UserAuthentication", 0).Equals(1);
+            }
+            set
+            {
+                if (value)
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp", "UserAuthentication", 1, RegistryValueKind.DWord);
+                }
+                else
+                {
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp", "UserAuthentication", 0, RegistryValueKind.DWord);
+                }
+            }
+        }
+
         public bool AllowMulti
         {
             get

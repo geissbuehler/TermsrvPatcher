@@ -15,20 +15,21 @@
         <TextBox x:Name="textBoxReplace" Height="23" Margin="204,136,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="textBoxReplace_TextChanged"/>
         <Label x:Name="labelFind" Content="Find Pattern:" HorizontalAlignment="Left" Margin="204,56,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
         <Label x:Name="labelReplace" Content="Replace Pattern:" HorizontalAlignment="Left" Margin="204,110,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
-        <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="70" Margin="10,10,0,0" VerticalAlignment="Top" Width="185" Grid.Column="1">
+        <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Height="85" Margin="10,10,0,0" VerticalAlignment="Top" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
                 <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked" Margin="0,0,10.143,0"/>
                 <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked" Margin="0,0,10.143,0"/>
+                <CheckBox x:Name="checkBoxNla" Content="NLA [recommeded]" VerticalAlignment="Top" ToolTip="Allow connections only from computers running Remote Desktop with Network Level Authentication" Checked="checkBoxNla_Checked" Unchecked="checkBoxNla_Unchecked"/>
             </StackPanel>
         </GroupBox>
         <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="204,9,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1" Height="21"/>
-        <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Height="70" Width="185" Grid.Column="1">
+        <GroupBox x:Name="groupBoxMulti" Header="Multiple Sessions per User" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Height="70" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-2,-12">
                 <RadioButton x:Name="radioButtonDisableMulti" Content="Disable [default]" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonDisableMulti_Checked" Margin="0,0,10.143,0"/>
                 <RadioButton x:Name="radioButtonEnableMulti" Content="Enable" VerticalAlignment="Top" GroupName="Multi" Checked="RadioButtonEnableMulti_Checked" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="70" Width="185" Grid.Column="1">
+        <GroupBox x:Name="groupBoxBlank" Header="Blank Password Logon" HorizontalAlignment="Left" Margin="10,175,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-0.441" Height="70" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,-1.857,-12.714">
                 <RadioButton x:Name="radioButtonDisableBlank" Content="Disable [default]" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonDisableBlank_Checked" Margin="0,0,10.714,0"/>
                 <RadioButton x:Name="radioButtonEnableBlank" Content="Enable" VerticalAlignment="Top" GroupName="Blank" Checked="RadioButtonEnableBlank_Checked" Margin="0,0,10.714,0"/>
@@ -37,7 +38,7 @@
         <Button x:Name="buttonUnpatch" Content="Restore Backup" Grid.Column="1" HorizontalAlignment="Left" Margin="314,9,0,0" VerticalAlignment="Top" Width="90" Click="ButtonUnpatch_Click" Height="21"/>
         <TextBox x:Name="textBoxMessages" Grid.Column="1" Margin="204,190,10,9" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
         <Label x:Name="labelMessages" Content="Messages:" Grid.Column="1" HorizontalAlignment="Left" Margin="204,164,0,0" VerticalAlignment="Top" Height="26" Width="64"/>
-        <GroupBox x:Name="groupBoxStatus" Grid.ColumnSpan="2" Header="termsrv.dll Status" HorizontalAlignment="Left" Height="83" Margin="10,235,0,0" VerticalAlignment="Top" Width="185">
+        <GroupBox x:Name="groupBoxStatus" Grid.ColumnSpan="2" Header="termsrv.dll Status" HorizontalAlignment="Left" Height="83" Margin="10,250,0,0" VerticalAlignment="Top" Width="185">
             <StackPanel Margin="10,10,-1.857,-12.857">
                 <TextBlock x:Name="textBlockVersion" TextWrapping="Wrap" Text="Version: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
                 <TextBlock x:Name="textBlockBackupStatus" TextWrapping="Wrap" Text="Backup: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>

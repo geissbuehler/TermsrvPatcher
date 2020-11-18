@@ -32,6 +32,14 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableRdp.IsChecked = true;
             }
+            if (patcher.EnableNla)
+            {
+                checkBoxNla.IsChecked = true;
+            }
+            else
+            {
+                checkBoxNla.IsChecked = false;
+            }
             if (patcher.AllowMulti)
             {
                 radioButtonEnableMulti.IsChecked = true;
@@ -339,6 +347,22 @@ namespace TermsrvPatcher
             {
                 patcher.AllowRdp = false;
                 patcher.SetFirewall(false);
+            }
+        }
+
+        private void checkBoxNla_Checked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                patcher.EnableNla = true;
+            }
+        }
+
+        private void checkBoxNla_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (formInitialized)
+            {
+                patcher.EnableNla = false;
             }
         }
 
