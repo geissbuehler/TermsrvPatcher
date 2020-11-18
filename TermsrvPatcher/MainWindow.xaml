@@ -45,7 +45,7 @@
             </StackPanel>
         </GroupBox>
         <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
-        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" IsChecked="True" Checked="radioButtonAutoMode_Checked"/>
+        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonAutoMode_Checked"/>
 
     </Grid>
 </Window>

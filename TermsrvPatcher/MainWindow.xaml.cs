@@ -48,7 +48,8 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
-            CheckStatus();
+            radioButtonAutoMode.IsChecked = true;
+            CheckStatus(false);
             formInitialized = true;
         }
 
@@ -149,13 +150,16 @@ namespace TermsrvPatcher
             textBoxMessages.ScrollToEnd();
         }
 
-        private void CheckStatus()
+        private void CheckStatus(bool quickCheck)
         {
-            textBoxMessages.Clear();
+            if (!quickCheck)
+            {
+                textBoxMessages.Clear();
+            }
             version = patcher.GetVersion();
             bool success = false;
             textBlockVersion.Text = "Version: " + version;
-            if (radioButtonAutoMode.IsChecked == true)
+            if (!quickCheck && (radioButtonAutoMode.IsChecked == true))
             {
                 List<object> patches = new List<object>();
                 try
@@ -217,13 +221,16 @@ namespace TermsrvPatcher
                 try
                 {
                     status = patcher.CheckStatus(Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text));
-                    if (status == Patcher.Status.Unkown)
+                    if (!quickCheck)
                     {
-                        AddMessage("Error: No match in termsrv.dll found for manual patch patterns");
-                    }
-                    else
-                    {
-                        AddMessage("Success: Match in termsrv.dll found for manual patch patterns");
+                        if (status == Patcher.Status.Unkown)
+                        {
+                            AddMessage("Error: No match in termsrv.dll found for manual patch patterns");
+                        }
+                        else
+                        {
+                            AddMessage("Manual patching enabled: Match in termsrv.dll found for manual patch patterns");
+                        }
                     }
                 }
                 catch (Exception exception)
@@ -235,7 +242,7 @@ namespace TermsrvPatcher
             switch (status)
             {
                 case Patcher.Status.Patched:
-                    textBlockStatus.Text = "Status: " + Patcher.Status.Patched.ToString();
+                    textBlockStatus.Text = "Status: " + Patcher.Status.Patched;
                     break;
                 case Patcher.Status.Unpatched:
                     textBlockStatus.Text = "Status: " + Patcher.Status.Unpatched;
@@ -296,7 +303,7 @@ namespace TermsrvPatcher
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             AddMessage("Old status: " + status);
-            CheckStatus();
+            CheckStatus(true);
             AddMessage("New status: " + status);
             SetControls();
         }
@@ -305,7 +312,7 @@ namespace TermsrvPatcher
         {
             if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
-                CheckStatus();
+                CheckStatus(false);
             }
         }
 
@@ -313,7 +320,7 @@ namespace TermsrvPatcher
         {
             if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
-                CheckStatus();
+                CheckStatus(false);
             }
         }
 
@@ -369,18 +376,12 @@ namespace TermsrvPatcher
 
         private void radioButtonAutoMode_Checked(object sender, RoutedEventArgs e)
         {
-            if (formInitialized)
-            {
-                CheckStatus();
-            }
+            CheckStatus(false);
         }
 
         private void radioButtonManualMode_Checked(object sender, RoutedEventArgs e)
         {
-            if (formInitialized)
-            {
-                CheckStatus();
-            }
+            CheckStatus(false);
         }
     }
 }
