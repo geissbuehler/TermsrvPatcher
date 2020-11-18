@@ -48,7 +48,7 @@
         <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
         <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonAutoMode_Checked"/>
         <TextBlock x:Name="TextBlockPatcherVersion"  Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,338,0,0" TextWrapping="Wrap" VerticalAlignment="Top">
-            <Hyperlink x:Name="HyperlinkPatcherVersion"  NavigateUri="https://github.com/geissbuehler/TermsrvPatcher/releases" RequestNavigate="HyperlinkPatcherVersion_RequestNavigate">Patcher version 0.0.0</Hyperlink>
+            <Hyperlink x:Name="HyperlinkPatcherVersion"  NavigateUri="https://github.com/geissbuehler/TermsrvPatcher/releases" RequestNavigate="HyperlinkPatcherVersion_RequestNavigate">Patcher version 1.0.0</Hyperlink>
         </TextBlock>
     </Grid>
 </Window>
