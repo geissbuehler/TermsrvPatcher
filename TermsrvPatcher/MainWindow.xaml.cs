@@ -407,5 +407,10 @@ namespace TermsrvPatcher
         {
             CheckStatus(false);
         }
+
+        private void HyperlinkPatcherVersion_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(e.Uri.ToString());
+        }
     }
 }
