@@ -120,12 +120,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="dll.ico" />
-    <Content Include="termmgr.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /d /y /e "$(ProjectDir)External\NSudoDevilMode\*" "$(TargetDir)NSudoDevilMode\"
-xcopy /d /y "$(ProjectDir)Patches.txt" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>xcopy /d /y /e "$(ProjectDir)External\NSudoDevilMode\*" "$(TargetDir)NSudoDevilMode\" &gt; NUL
+xcopy /d /y "$(ProjectDir)Patches.txt" "$(TargetDir)" &gt; NUL</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
