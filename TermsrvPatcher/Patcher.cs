@@ -265,18 +265,22 @@ namespace TermsrvPatcher
                 if (FindPattern(replace) == -1)
                 {
                     // Replace pattern not found
+
                     if (FindPattern(find) == -1)
                     {
                         // Find pattern not found
+
                         status = Status.Unkown;
                         break;
                     }
                     else
                     {
                         // Find pattern found
+
                         if (status == Status.Patched)
                         {
                             // Opposite result compared to previous loop
+
                             status = Status.Unkown;
                             break;
                         }
@@ -289,9 +293,11 @@ namespace TermsrvPatcher
                 else
                 {
                     // Replace pattern found
+
                     if (status == Status.Unpatched)
                     {
                         // Opposite result compared to previous loop
+
                         status = Status.Unkown;
                         break;
                     }
