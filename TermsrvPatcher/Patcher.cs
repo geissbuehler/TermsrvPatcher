@@ -199,12 +199,12 @@ namespace TermsrvPatcher
                 string[] patchinfo = trimmed.Split(',');
                 if (patchinfo.Length != 3)
                 {
-                    warnings.Add(String.Format("Element count not equal to 3 at line {0} in patchfile '{1}' ({2})", linecount, Patchfile, trimmed));
+                    warnings.Add(String.Format("Element count not equal to 3 on line {0} in patchfile '{1}' ({2})", linecount, Patchfile, trimmed));
                     continue;
                 }
                 if ((patchinfo[0].Trim() != "x64") && (patchinfo[0].Trim() != "x86"))
                 {
-                    warnings.Add(String.Format("Architecture '{0}' not equal to 'x86' or 'x64' at line {1} in patchfile '{2}'", patchinfo[0].Trim(), linecount, Patchfile));
+                    warnings.Add(String.Format("Architecture '{0}' not equal to 'x86' or 'x64' on line {1} in patchfile '{2}'", patchinfo[0].Trim(), linecount, Patchfile));
                     continue;
                 }
                 List<object> patch;
@@ -214,7 +214,7 @@ namespace TermsrvPatcher
                 }
                 catch (Exception exception)
                 {
-                    warnings.Add(String.Format("{0} at line {1} in patchfile '{2}'", exception.Message.ToString(), linecount, Patchfile));
+                    warnings.Add(String.Format("{0} on line {1} in patchfile '{2}'", exception.Message.ToString(), linecount, Patchfile));
                     continue;
                 }
                 if (patchinfo[0].Trim() == arch)

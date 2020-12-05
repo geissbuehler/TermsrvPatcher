@@ -208,14 +208,14 @@ namespace TermsrvPatcher
                         if (patchStatus == Patcher.Status.Patched)
                         {
                             patchedMatches++;
-                            AddMessage(String.Format("Patch at line {0} in '{1}' indicates patched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
+                            AddMessage(String.Format("Patch on line {0} in '{1}' indicates patched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
                         }
                         else
                         {
                             // Remember the patch to use it for patching as long as it remains the only match
                             matchingPatch = patch;
                             unpatchedMatches++;
-                            AddMessage(String.Format("Patch at line {0} in '{1}' indicates unpatched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
+                            AddMessage(String.Format("Patch on line {0} in '{1}' indicates unpatched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
                         }
                     }
                 }
@@ -235,7 +235,7 @@ namespace TermsrvPatcher
                         // A single match for the unpatched status allows to patch termsrv.dll
 
                         status = Patcher.Status.Unpatched;
-                        AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)matchingPatch[1]));
+                        AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found on line {1}", Patcher.Patchfile, (ulong)matchingPatch[1]));
                         foreach (List<object> subpatch in (List<object>)matchingPatch[0])
                         {
                             if (textBoxFind.Text != "")
