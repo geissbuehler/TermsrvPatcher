@@ -15,6 +15,7 @@ namespace TermsrvPatcher
         Patcher.Status status = Patcher.Status.Unkown;
         private string version = "";
         List<object> patches = new List<object>();
+        private bool readfileSuccess = false;
         private readonly BackgroundWorker worker = new BackgroundWorker();
 
         public MainWindow()
@@ -169,7 +170,6 @@ namespace TermsrvPatcher
             textBlockVersion.Text = "Version: " + version;
             if (radioButtonAutoMode.IsChecked == true)
             {
-                bool readfile_success = false;
                 if (!quickCheck)
                 {
                     // Read patches from file
@@ -183,28 +183,60 @@ namespace TermsrvPatcher
                         {
                             AddMessage("Warning: " + warning);
                         }
-                        readfile_success = true;
+                        readfileSuccess = true;
                     }
                     catch (System.IO.FileNotFoundException)
                     {
+                        readfileSuccess = false;
                         AddMessage(String.Format("Error: patchfile '{0}' not found, prepare '{0}' or enter patches manually", Patcher.Patchfile));
                     }
                     catch (Exception exception)
                     {
+                        readfileSuccess = false;
                         AddMessage(String.Format("Error: Reading patchfile '{0}' failed, fix '{0}' or enter patches manually ({1})", Patcher.Patchfile, exception.Message.ToString()));
                     }
                 }
 
-                status = Patcher.Status.Unkown;
-                bool nomatch = true;
+                List<object> matchingPatch = new List<object>();
+                ulong patchedMatches = 0;
+                ulong unpatchedMatches = 0;
                 foreach (List<Object> patch in patches)
                 {
-                    status = patcher.CheckStatus((List<object>)patch[0]);
-                    if (status != Patcher.Status.Unkown)
+                    Patcher.Status patchStatus = patcher.CheckStatus((List<object>)patch[0]);
+                    if (patchStatus != Patcher.Status.Unkown)
                     {
-                        textBoxFind.Text = "";
-                        textBoxReplace.Text = "";
-                        foreach (List<object> subpatch in (List<object>)patch[0])
+                        if (patchStatus == Patcher.Status.Patched)
+                        {
+                            patchedMatches++;
+                            AddMessage(String.Format("Patch at line {0} in '{1}' indicates patched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
+                        }
+                        else
+                        {
+                            // Remember the patch to use it for patching as long as it remains the only match
+                            matchingPatch = patch;
+                            unpatchedMatches++;
+                            AddMessage(String.Format("Patch at line {0} in '{1}' indicates unpatched termsrv.dll", (ulong)patch[1], Patcher.Patchfile));
+                        }
+                    }
+                }
+                textBoxFind.Text = "";
+                textBoxReplace.Text = "";
+                if (readfileSuccess)
+                {
+                    // Do not complain here again for missing patches if patch file reading skipped or failed (failed reading already shows other warnings)
+
+                    if (unpatchedMatches == 0 && patchedMatches == 0)
+                    {
+                        status = Patcher.Status.Unkown;
+                        AddMessage(String.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
+                    }
+                    else if (unpatchedMatches == 1 && patchedMatches == 0 )
+                    {
+                        // A single match for the unpatched status allows to patch termsrv.dll
+
+                        status = Patcher.Status.Unpatched;
+                        AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)matchingPatch[1]));
+                        foreach (List<object> subpatch in (List<object>)matchingPatch[0])
                         {
                             if (textBoxFind.Text != "")
                             {
@@ -214,16 +246,29 @@ namespace TermsrvPatcher
                             textBoxFind.Text += Patcher.IntArrToString((int[])subpatch[0]);
                             textBoxReplace.Text += Patcher.ByteArrToString((byte[])subpatch[1]);
                         }
-                        nomatch = false;
-                        AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found at line {1}", Patcher.Patchfile, (ulong)patch[1]));
-                        break;
+                    }
+                    else if (unpatchedMatches > 1 && patchedMatches == 0)
+                    {
+                        // More than one match for unpatched status
+
+                        status = Patcher.Status.Unkown;
+                        AddMessage(String.Format("Error: Multiple patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
+                    }
+                    else if (unpatchedMatches == 0 && patchedMatches > 0)
+                    {
+                        // One or more matches for the patched status is fine for the various Windows 10 termsrv.dll versions
+
+                        status = Patcher.Status.Patched;
+                    }
+                    else if (unpatchedMatches > 0 && patchedMatches > 0)
+                    {
+                        status = Patcher.Status.Unkown;
+                        AddMessage(String.Format("Error: Contradicting patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
                     }
                 }
-                if (readfile_success && nomatch)
+                else
                 {
-                    // Do not complain again for missing patches if patch file reading skipped or failed (failed reading already shows other warnings)
-
-                    AddMessage(String.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", Patcher.Patchfile));
+                    status = Patcher.Status.Unkown;
                 }
             }
             else
