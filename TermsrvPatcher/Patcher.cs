@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using NetFwTypeLib;
 using System.ServiceProcess;
+using System.Security.AccessControl;
 
 namespace TermsrvPatcher
 {
@@ -334,24 +335,23 @@ namespace TermsrvPatcher
 
         public void Patch(List<object> patch)
         {
+            EnableDevilMode();
             string backup = TermsrvPath + "." + GetVersion();
             if (!File.Exists(backup))
             {
                 File.Copy(TermsrvPath, backup);
+                FileInfo sourceFileInfo = new FileInfo(TermsrvPath);
+                FileInfo destinationFileInfo = new FileInfo(backup);
+                FileSecurity sourceFileSecurity = sourceFileInfo.GetAccessControl();
+                sourceFileSecurity.SetAccessRuleProtection(true, true);
+                destinationFileInfo.SetAccessControl(sourceFileSecurity);
             }
-            //FileInfo fi = new FileInfo(TermsrvPath);
-            //long l = fi.Length;
 
-            EnableDevilMode();
             foreach (List<object> subpatch in patch)
             {
                 int[] find = (int[])subpatch[0];
                 byte[] replace = (byte[])subpatch[1];
                 int match = FindPattern(find);
-
-                //int matchReplace = FindPattern(replace);
-
-
                 List<byte> binReplace = new List<byte>();
                 foreach (byte hex in replace)
                 {
