@@ -11,12 +11,14 @@ additional options for enabling blank passwort logon or multiple sessions per us
 
 [Latest version](../../releases/latest)
 
+[![Releases](https://img.shields.io/github/downloads/geissbuehler/TermsrvPatcher/total.svg)](../../releases)
+
 For legal reasons, only example patches are available in the included Patches.txt file.
 
 ## System Requirements
 
 - Windows 7 or newer
-- 32-bit (x86) or 64-bit (ADM64) operating system
+- 32-bit (x86) or 64-bit (AMD64) operating system
 - .NET Framework 4.7.2 or newer
 
 ## Screenshot
