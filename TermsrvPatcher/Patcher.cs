@@ -13,9 +13,8 @@ namespace TermsrvPatcher
 {
     class Patcher
     {
-        public const string Patchfile = "Patches.txt";
+        public readonly string Patchfile;
         public const int MinByteCount = 4;
-
         private byte[] termsrvContent;
         public string TermsrvPath { get; }
 
@@ -34,6 +33,17 @@ namespace TermsrvPatcher
         static extern bool FreeLibrary(IntPtr hLibModule);
 
         private IntPtr NSudoDevilModeModuleHandle;
+
+        public Patcher()
+        {
+            Patchfile = System.Configuration.ConfigurationManager.AppSettings["patchfile"];
+            if(String.IsNullOrEmpty(Patchfile))
+            {
+                Patchfile = "Patches.txt";
+            }
+            TermsrvPath = GetTermsrvPath();
+            ReadFile();
+        }
 
         private void EnableDevilMode()
         {
@@ -170,7 +180,7 @@ namespace TermsrvPatcher
             return patch;
         }
 
-        public static List<Object> ReadPatchfile()
+        public List<Object> ReadPatchfile()
         {
             List<Object> patches = new List<Object>();
             List<string> warnings = new List<string>();
@@ -231,12 +241,6 @@ namespace TermsrvPatcher
         {
             // Be aware that the process must run in 64-bit mode on 64-bit systems (otherwise termserv.dll is only accessible via C:\Windows\Sysnative\termserv.dll)
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "termsrv.dll");
-        }
-
-        public Patcher()
-        {
-            TermsrvPath = GetTermsrvPath();
-            ReadFile();
         }
 
         /// <summary>
