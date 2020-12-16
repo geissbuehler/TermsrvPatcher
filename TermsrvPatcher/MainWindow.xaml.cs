@@ -109,11 +109,11 @@ namespace TermsrvPatcher
             radioButtonManualMode.IsEnabled = true;
         }
 
-        private bool CheckRdpSession()
+        private bool CheckRdpSession(string text)
         {
             if (System.Windows.Forms.SystemInformation.TerminalServerSession)
             {
-                var result = System.Windows.Forms.MessageBox.Show("The current remote desktop session will be disconnected. Continue?", "RDP session detected", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+                var result = System.Windows.Forms.MessageBox.Show(text, "RDP session detected", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
                 if (result == System.Windows.Forms.DialogResult.No)
                 {
                     return false;
@@ -131,7 +131,7 @@ namespace TermsrvPatcher
 
         private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckRdpSession())
+            if (CheckRdpSession("The current remote desktop session will be disconnected. Continue?"))
             {
                 DisableControls();
                 worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
@@ -140,7 +140,7 @@ namespace TermsrvPatcher
 
         private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckRdpSession())
+            if (CheckRdpSession("The current remote desktop session will be disconnected. Continue?"))
             {
                 DisableControls();
                 worker.RunWorkerAsync(argument: new object[] { false });
@@ -392,8 +392,15 @@ namespace TermsrvPatcher
         {
             if (formInitialized)
             {
-                patcher.AllowRdp = false;
-                patcher.SetFirewall(false);
+                if (CheckRdpSession("The current remote desktop session will be disconnected and the system will no more be accessible via remote desktop. Continue?"))
+                {
+                    patcher.AllowRdp = false;
+                    patcher.SetFirewall(false);
+                }
+                else
+                {
+                    radioButtonEnableRdp.IsChecked = true;
+                }
             }
         }
 
