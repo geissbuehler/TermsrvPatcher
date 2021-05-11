@@ -149,6 +149,8 @@ namespace TermsrvPatcher
 
         private void AddMessage(string message, bool appendLine = false)
         {
+            // The message is appended to the existing line if appendLine = true
+            // The last line never ends with a new line
             if ((textBoxMessages.Text.Length) > 0 && (!appendLine))
             {
                 textBoxMessages.Text += Environment.NewLine + message;
@@ -321,7 +323,7 @@ namespace TermsrvPatcher
         {
             try
             {
-                worker.ReportProgress(20, new object[] { "Stopping TermService...", false });
+                worker.ReportProgress(20, new object[] { $"Stopping TermService (might take up to {3 * Patcher.ServiceTimeout} seconds)...", false });
                 patcher.StopTermService();
                 worker.ReportProgress(40, new object[] { " Done", true });
                 if (Convert.ToBoolean(((object[])e.Argument)[0]))
@@ -340,9 +342,23 @@ namespace TermsrvPatcher
                     worker.ReportProgress(60, new object[] { "Restoring termsrv.dll backup", false });
                     patcher.Unpatch();
                 }
-                worker.ReportProgress(80, new object[] { "Starting TermService...", false });
-                patcher.StartTermService();
+                worker.ReportProgress(80, new object[] { $"Starting TermService (might take up to {Patcher.ServiceTimeout} seconds)...", false });
+                try
+                {
+                    patcher.StartTermService();
+                }
+                catch (System.ServiceProcess.TimeoutException)
+                {
+                    worker.ReportProgress(100, new object[] { " Failed", true });
+                    worker.ReportProgress(100, new object[] { "Starting TermService timed out", false });
+                }
                 worker.ReportProgress(100, new object[] { " Done", true });
+            }
+            catch (ServiceStopException)
+            {
+                // Unable to stop the service
+                worker.ReportProgress(100, new object[] { " Failed", true });
+                worker.ReportProgress(100, new object[] { "Stop the Remote Desktop service manually and try again", false });
             }
             catch (Exception exception)
             {

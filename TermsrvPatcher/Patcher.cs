@@ -13,8 +13,12 @@ namespace TermsrvPatcher
 {
     class Patcher
     {
-        public readonly string Patchfile;
+        // Timeout for starting and stopping the TermService
+        public const int ServiceTimeout = 30;
+        // Minimum byte count for a patch
         public const int MinByteCount = 4;
+
+        public readonly string Patchfile;
         private byte[] termsrvContent;
         public string TermsrvPath { get; }
 
@@ -318,12 +322,53 @@ namespace TermsrvPatcher
         public void StopTermService()
         {
             ServiceController sc = new ServiceController("TermService");
-
-            if (sc.Status == ServiceControllerStatus.Running)
+            // Do not use sc.CanStop, it is also true when already stopping!
+            if (sc.Status.Equals(ServiceControllerStatus.Running))
             {
                 sc.Stop();
+                try
+                {
+                    sc.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, ServiceTimeout));
+                }
+                catch (System.ServiceProcess.TimeoutException)
+                {
+                    // Timeout when stopping TermService occured:
+                    // This behaviour has been observed on some Windows 10 systems where the service remains in stopping state forever.
+                    // This problem usually does not occur directly after a reboot. To handle this state, a workaround is applied:
+                    // Kill the service process, wait for running state and try again.
+                    int svcProcid = ServiceProcessId.GetServiceProcessId(sc);
+                    if (svcProcid > -1)
+                    {
+                        Process.GetProcessById(svcProcid).Kill();
+                        try
+                        {
+                            // The service is usually restarted after killing it
+                            sc.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, ServiceTimeout));
+                            // Without a delay, the subsequent stop attempt might time out again (100 ms seems enough, 1000 ms adds some margin)
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                        catch (System.ServiceProcess.TimeoutException)
+                        {
+                        }
+                        if (sc.Status.Equals(ServiceControllerStatus.Running))
+                        {
+                            sc.Stop();
+                            try
+                            {
+                                // The second stop attempt usually succeeds
+                                sc.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, ServiceTimeout));
+                            }
+                            catch (System.ServiceProcess.TimeoutException)
+                            {
+                            }
+                        }
+                    }
+                }
             }
-            sc.WaitForStatus(ServiceControllerStatus.Stopped);
+            if (!sc.Status.Equals(ServiceControllerStatus.Stopped))
+            {
+                throw new ServiceStopException();
+            }
         }
 
         public void StartTermService()
@@ -334,7 +379,7 @@ namespace TermsrvPatcher
             {
                 sc.Start();
             }
-            sc.WaitForStatus(ServiceControllerStatus.Running);
+            sc.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, ServiceTimeout));
         }
 
         public void Patch(List<object> patch)
