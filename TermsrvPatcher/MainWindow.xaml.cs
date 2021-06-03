@@ -25,6 +25,13 @@ namespace TermsrvPatcher
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
             worker.ProgressChanged += worker_ProgressChanged;
             InitializeComponent();
+            // Get Assemblyversion
+            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            // Remove last digit of Assemblyversion, except it is not equal to 0
+            version = System.Text.RegularExpressions.Regex.Replace(version, @"(\d\.\d\.\d)(\.0$)", "$1");
+            // Update the link text
+            System.Windows.Documents.Run link = (System.Windows.Documents.Run)HyperlinkPatcherVersion.Inlines.FirstInline;
+            link.Text = String.Format("Patcher version {0}", version);
             patcher = new Patcher();
             if (patcher.AllowRdp)
             {
