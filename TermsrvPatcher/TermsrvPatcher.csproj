@@ -129,7 +129,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /d /y /e "$(ProjectDir)External\NSudoDevilMode\*" "$(TargetDir)NSudoDevilMode\" &gt; NUL
-xcopy /d /y "$(ProjectDir)Patches.txt" "$(TargetDir)" &gt; NUL</PostBuildEvent>
+xcopy /d /y "$(ProjectDir)Patches.txt" "$(TargetDir)" &gt; NUL
+if $(ConfigurationName) == Release (powershell Compress-Archive -Path '$(TargetDir)$(TargetFileName)', '$(TargetDir)$(TargetFileName).config', '$(TargetDir)Patches.txt', '$(TargetDir)NSudoDevilMode' -DestinationPath ^('$(TargetDir)$(ProjectName)_' + ^([System.Diagnostics.FileVersionInfo]::GetVersionInfo^('$(TargetDir)$(TargetFileName)'^).ProductVersion -Replace '^(\d\.\d\.\d^)^(\.0$^)', '$1'^) + '.zip'^) -CompressionLevel NoCompression -Force)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
