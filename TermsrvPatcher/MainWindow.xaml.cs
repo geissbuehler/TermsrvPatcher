@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Collections.Generic;
+using static TermsrvPatcher.Patcher.Status;
 
 namespace TermsrvPatcher
 {
@@ -12,7 +13,7 @@ namespace TermsrvPatcher
     {
         private Patcher patcher;
         private bool formInitialized = false;
-        Patcher.Status status = Patcher.Status.Unkown;
+        Patcher.Status status = Unkown;
         private string version = "";
         List<object> patches = new List<object>();
         private bool readfileSuccess = false;
@@ -84,13 +85,13 @@ namespace TermsrvPatcher
         {
             switch (status)
             {
-                case Patcher.Status.Patched:
+                case Patched:
                     buttonPatch.IsEnabled = false;
                     break;
-                case Patcher.Status.Unpatched:
+                case Unpatched:
                     buttonPatch.IsEnabled = true;
                     break;
-                case Patcher.Status.Unkown:
+                case Unkown:
                     buttonPatch.IsEnabled = false;
                     break;
             }
@@ -212,9 +213,9 @@ namespace TermsrvPatcher
                 foreach (List<Object> patch in patches)
                 {
                     Patcher.Status patchStatus = patcher.CheckStatus((List<object>)patch[0]);
-                    if (patchStatus != Patcher.Status.Unkown)
+                    if (patchStatus != Unkown)
                     {
-                        if (patchStatus == Patcher.Status.Patched)
+                        if (patchStatus == Patched)
                         {
                             patchedMatches++;
                             AddMessage(String.Format("Patch on line {0} in '{1}' indicates patched termsrv.dll", (ulong)patch[1], patcher.Patchfile));
@@ -236,14 +237,14 @@ namespace TermsrvPatcher
 
                     if (unpatchedMatches == 0 && patchedMatches == 0)
                     {
-                        status = Patcher.Status.Unkown;
+                        status = Unkown;
                         AddMessage(String.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
                     else if (unpatchedMatches == 1 && patchedMatches == 0 )
                     {
                         // A single match for the unpatched status allows to patch termsrv.dll
 
-                        status = Patcher.Status.Unpatched;
+                        status = Unpatched;
                         AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found on line {1}", patcher.Patchfile, (ulong)matchingPatch[1]));
                         foreach (List<object> subpatch in (List<object>)matchingPatch[0])
                         {
@@ -260,24 +261,24 @@ namespace TermsrvPatcher
                     {
                         // More than one match for unpatched status
 
-                        status = Patcher.Status.Unkown;
+                        status = Unkown;
                         AddMessage(String.Format("Error: Multiple patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
                     else if (unpatchedMatches == 0 && patchedMatches > 0)
                     {
                         // One or more matches for the patched status is fine for the various Windows 10 termsrv.dll versions
 
-                        status = Patcher.Status.Patched;
+                        status = Patched;
                     }
                     else if (unpatchedMatches > 0 && patchedMatches > 0)
                     {
-                        status = Patcher.Status.Unkown;
+                        status = Unkown;
                         AddMessage(String.Format("Error: Contradicting patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
                 }
                 else
                 {
-                    status = Patcher.Status.Unkown;
+                    status = Unkown;
                 }
             }
             else
@@ -285,7 +286,7 @@ namespace TermsrvPatcher
                 try
                 {
                     status = patcher.CheckStatus(Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text));
-                    if (status == Patcher.Status.Unkown)
+                    if (status == Unkown)
                     {
                         AddMessage("Error: No match in termsrv.dll found for manual patch patterns");
                     }
@@ -299,20 +300,20 @@ namespace TermsrvPatcher
                 }
                 catch (Exception exception)
                 {
-                    status = Patcher.Status.Unkown;
+                    status = Unkown;
                     AddMessage(String.Format("Error: {0}", exception.Message.ToString()));
                 }
             }
             switch (status)
             {
-                case Patcher.Status.Patched:
-                    textBlockStatus.Text = "Status: " + Patcher.Status.Patched;
+                case Patched:
+                    textBlockStatus.Text = "Status: " + Patched;
                     break;
-                case Patcher.Status.Unpatched:
-                    textBlockStatus.Text = "Status: " + Patcher.Status.Unpatched;
+                case Unpatched:
+                    textBlockStatus.Text = "Status: " + Unpatched;
                     break;
-                case Patcher.Status.Unkown:
-                    textBlockStatus.Text = "Status: " + Patcher.Status.Unkown;
+                case Unkown:
+                    textBlockStatus.Text = "Status: " + Unkown;
                     break;
             }
             if (patcher.BackupAvailable())
@@ -337,7 +338,7 @@ namespace TermsrvPatcher
                 {
                     //patch
                     List<object> patch = (List<object>)((object[])e.Argument)[1];
-                    if (patcher.CheckStatus(patch) == Patcher.Status.Unpatched)
+                    if (patcher.CheckStatus(patch) == Unpatched)
                     {
                         worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
                         patcher.Patch(patch);
