@@ -241,7 +241,7 @@ namespace TermsrvPatcher
             return new List<Object>() { patches, warnings };
         }
 
-            public static string GetTermsrvPath()
+        public static string GetTermsrvPath()
         {
             // Be aware that the process must run in 64-bit mode on 64-bit systems (otherwise termserv.dll is only accessible via C:\Windows\Sysnative\termserv.dll)
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "termsrv.dll");
@@ -408,7 +408,6 @@ namespace TermsrvPatcher
                 }
                 if (binReplace.Count == 0)
                 {
-                    //DisableDevilMode();
                     // TODO: Throw useful exception here
                 }
 
@@ -579,9 +578,14 @@ namespace TermsrvPatcher
             return FileVersionInfo.GetVersionInfo(TermsrvPath).ProductVersion;
         }
 
+        public string GetBackupPath()
+        {
+            return TermsrvPath + "." + GetVersion();
+    }
+
         public bool BackupAvailable()
         {
-            return File.Exists(TermsrvPath + "." + GetVersion());
+            return File.Exists(GetBackupPath());
         }
 
         public void SetFirewall(bool enabled)
