@@ -342,15 +342,17 @@ namespace TermsrvPatcher
                     List<object> patch = (List<object>)((object[])e.Argument)[1];
                     if (patcher.CheckStatus(patch) == Unpatched)
                     {
-                        worker.ReportProgress(60, new object[] { "Patching termsrv.dll", false });
+                        worker.ReportProgress(60, new object[] { "Patching termsrv.dll...", false });
                         patcher.Patch(patch);
+                        worker.ReportProgress(70, new object[] { " Done", true });
                     }
                 }
                 else
                 {
                     //unpatch
-                    worker.ReportProgress(60, new object[] { "Restoring termsrv.dll backup", false });
+                    worker.ReportProgress(60, new object[] { "Restoring termsrv.dll backup...", false });
                     patcher.Unpatch();
+                    worker.ReportProgress(70, new object[] { " Done", true });
                 }
                 worker.ReportProgress(80, new object[] { $"Starting TermService (might take up to {Patcher.ServiceTimeout} seconds)...", false });
                 try
@@ -369,6 +371,12 @@ namespace TermsrvPatcher
                 // Unable to stop the service
                 worker.ReportProgress(100, new object[] { " Failed", true });
                 worker.ReportProgress(100, new object[] { "Stop the Remote Desktop service manually and try again", false });
+            }
+            // HResult = 32 -> ERROR_SHARING_VIOLATION -> File in use by another process
+            catch (System.IO.IOException exception) when ((exception.HResult & 0x0000FFFF) == 32)
+            {
+                worker.ReportProgress(100, new object[] { " Failed", true });
+                worker.ReportProgress(100, new object[] { $"{patcher.TermsrvPath} is in use by another process, stop the Remote Desktop service manually and make sure no process is locking the file and try again", false });
             }
             catch (Exception exception)
             {
