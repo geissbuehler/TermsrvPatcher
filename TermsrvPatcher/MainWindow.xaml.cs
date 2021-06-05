@@ -139,7 +139,8 @@ namespace TermsrvPatcher
 
         private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckRdpSession("The current remote desktop session will be disconnected. Continue?"))
+            // Stoppig: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
+            if (CheckRdpSession($"The current remote desktop session will be disconnected and remain unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
             {
                 DisableControls();
                 worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
@@ -148,7 +149,8 @@ namespace TermsrvPatcher
 
         private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckRdpSession("The current remote desktop session will be disconnected. Continue?"))
+            // Stoppig: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
+            if (CheckRdpSession($"The current remote desktop session will be disconnected and remain unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
             {
                 DisableControls();
                 worker.RunWorkerAsync(argument: new object[] { false });
