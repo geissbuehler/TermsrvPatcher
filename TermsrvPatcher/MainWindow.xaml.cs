@@ -18,6 +18,7 @@ namespace TermsrvPatcher
         List<object> patches = new List<object>();
         private bool readfileSuccess = false;
         private readonly BackgroundWorker worker = new BackgroundWorker();
+        private readonly BackgroundWorker exitTimer = new BackgroundWorker();
 
         public MainWindow()
         {
@@ -25,6 +26,8 @@ namespace TermsrvPatcher
             worker.DoWork += worker_DoWork;
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
             worker.ProgressChanged += worker_ProgressChanged;
+            exitTimer.DoWork += exitTimer_DoWork;
+            exitTimer.RunWorkerCompleted += exitTimer_RunWorkerCompleted;
             InitializeComponent();
             // Get Assemblyversion
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -69,6 +72,27 @@ namespace TermsrvPatcher
             radioButtonAutoMode.IsChecked = true;
             CheckStatus(false);
             formInitialized = true;
+            if (App.unattended)
+            {
+                AddMessage("---Running in unattended mode---");
+                if (status == Unpatched)
+                {
+                    Patch();
+                }
+                else
+                {
+                    if (status == Patched)
+                    {
+                        AddMessage("Already patched, nothing to do");
+                    }
+                    else if (status == Unkown)
+                    {
+                        AddMessage("Patch status unkown, nothing to do");
+                    }
+                    AddMessage("---Exiting in 10 seconds---");
+                    exitTimer.RunWorkerAsync();
+                }
+            }
         }
 
         private void DisableControls()
@@ -83,38 +107,57 @@ namespace TermsrvPatcher
 
         private void SetControls()
         {
-            switch (status)
+            if (App.unattended)
             {
-                case Patched:
-                    buttonPatch.IsEnabled = false;
-                    break;
-                case Unpatched:
-                    buttonPatch.IsEnabled = true;
-                    break;
-                case Unkown:
-                    buttonPatch.IsEnabled = false;
-                    break;
-            }
-            if (patcher.BackupAvailable())
-            {
-                buttonUnpatch.IsEnabled = true;
-            }
-            else
-            {
+                buttonPatch.IsEnabled = false;
                 buttonUnpatch.IsEnabled = false;
-            }
-            if (radioButtonAutoMode.IsChecked == true)
-            {
                 textBoxFind.IsEnabled = false;
                 textBoxReplace.IsEnabled = false;
+                radioButtonAutoMode.IsEnabled = false;
+                radioButtonManualMode.IsEnabled = false;
+                radioButtonEnableRdp.IsEnabled = false;
+                radioButtonDisableRdp.IsEnabled = false;
+                checkBoxNla.IsEnabled = false;
+                radioButtonEnableMulti.IsEnabled = false;
+                radioButtonDisableMulti.IsEnabled = false;
+                radioButtonEnableBlank.IsEnabled = false;
+                radioButtonDisableBlank.IsEnabled = false;
             }
             else
             {
-                textBoxFind.IsEnabled = true;
-                textBoxReplace.IsEnabled = true;
+                switch (status)
+                {
+                    case Patched:
+                        buttonPatch.IsEnabled = false;
+                        break;
+                    case Unpatched:
+                        buttonPatch.IsEnabled = true;
+                        break;
+                    case Unkown:
+                        buttonPatch.IsEnabled = false;
+                        break;
+                }
+                if (patcher.BackupAvailable())
+                {
+                    buttonUnpatch.IsEnabled = true;
+                }
+                else
+                {
+                    buttonUnpatch.IsEnabled = false;
+                }
+                if (radioButtonAutoMode.IsChecked == true)
+                {
+                    textBoxFind.IsEnabled = false;
+                    textBoxReplace.IsEnabled = false;
+                }
+                else
+                {
+                    textBoxFind.IsEnabled = true;
+                    textBoxReplace.IsEnabled = true;
+                }
+                radioButtonAutoMode.IsEnabled = true;
+                radioButtonManualMode.IsEnabled = true;
             }
-            radioButtonAutoMode.IsEnabled = true;
-            radioButtonManualMode.IsEnabled = true;
         }
 
         private bool CheckRdpSession(string text)
@@ -137,13 +180,18 @@ namespace TermsrvPatcher
             }
         }
 
+        private void Patch()
+        {
+            worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
+        }
+
         private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
             // Stoppig: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
             if (CheckRdpSession($"The current remote desktop session will be disconnected and might remain unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
             {
                 DisableControls();
-                worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
+                Patch();
             }
         }
 
@@ -396,6 +444,21 @@ namespace TermsrvPatcher
             CheckStatus(true);
             AddMessage("New status: " + status);
             SetControls();
+            if (App.unattended)
+            {
+                AddMessage("---Exiting in 10 seconds---");
+                exitTimer.RunWorkerAsync();
+            }
+        }
+
+        private void exitTimer_DoWork(object sender, DoWorkEventArgs e)
+        {
+            System.Threading.Thread.Sleep(10000);
+        }
+
+        private void exitTimer_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
