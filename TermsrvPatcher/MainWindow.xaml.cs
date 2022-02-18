@@ -11,11 +11,12 @@ namespace TermsrvPatcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Patcher patcher;
-        private bool formInitialized = false;
-        Patcher.Status status = Unkown;
+        private readonly Patcher patcher;
+        private readonly string unattendLog;
+        private readonly bool formInitialized = false;
+        private Patcher.Status status = Unkown;
         private string version = "";
-        List<object> patches = new List<object>();
+        private List<object> patches = new List<object>();
         private bool readfileSuccess = false;
         private readonly BackgroundWorker worker = new BackgroundWorker();
         private readonly BackgroundWorker exitTimer = new BackgroundWorker();
@@ -29,6 +30,7 @@ namespace TermsrvPatcher
             exitTimer.DoWork += exitTimer_DoWork;
             exitTimer.RunWorkerCompleted += exitTimer_RunWorkerCompleted;
             InitializeComponent();
+
             // Get Assemblyversion
             string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             // Remove last digit of Assemblyversion, except it is not equal to 0
@@ -36,6 +38,13 @@ namespace TermsrvPatcher
             // Update the link text
             System.Windows.Documents.Run link = (System.Windows.Documents.Run)HyperlinkPatcherVersion.Inlines.FirstInline;
             link.Text = String.Format("Patcher version {0}", version);
+
+            unattendLog = System.Configuration.ConfigurationManager.AppSettings["unattendlog"];
+            if (String.IsNullOrEmpty(unattendLog))
+            {
+                unattendLog = "UnattendLog.txt";
+            }
+
             patcher = new Patcher();
             if (patcher.AllowRdp)
             {
@@ -72,6 +81,7 @@ namespace TermsrvPatcher
             radioButtonAutoMode.IsChecked = true;
             CheckStatus(false);
             formInitialized = true;
+
             if (App.unattended)
             {
                 AddMessage("---Running in unattended mode---");
@@ -218,6 +228,10 @@ namespace TermsrvPatcher
                 textBoxMessages.Text += message;
             }
             textBoxMessages.ScrollToEnd();
+            if (App.unattended)
+            {
+                System.IO.File.WriteAllText(unattendLog, textBoxMessages.Text);
+            }
         }
 
         private void CheckStatus(bool quickCheck)
