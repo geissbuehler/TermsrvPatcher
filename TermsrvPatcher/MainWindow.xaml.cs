@@ -580,6 +580,14 @@ namespace TermsrvPatcher
             }
         }
 
+        private void checkBoxTask_Checked(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void checkBoxTask_Unchecked(object sender, RoutedEventArgs e)
+        {
+        }
+
         private void HyperlinkPatcherVersion_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());

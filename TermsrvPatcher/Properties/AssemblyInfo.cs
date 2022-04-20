@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TermsrvPatcher")]
-[assembly: AssemblyCopyright("Copyright © Urs Geissbühler 2017")]
+[assembly: AssemblyCopyright("Copyright © Urs Geissbühler 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

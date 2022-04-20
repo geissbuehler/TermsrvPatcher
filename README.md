@@ -1,6 +1,6 @@
 # TermsrvPatcher
 
-TermservPatcher simplifies the process of patching the termsrv.dll file for enabling concurrent remote desktop sessions on non-server Windows editions.
+TermsrvPatcher simplifies the process of patching the termsrv.dll file for enabling concurrent remote desktop sessions on non-server Windows editions.
 
 ## RDP Settings
 
