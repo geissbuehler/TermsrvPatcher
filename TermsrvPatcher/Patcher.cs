@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using NetFwTypeLib;
 using System.ServiceProcess;
 using System.Security.AccessControl;
+using Microsoft.Win32.TaskScheduler;
 
 namespace TermsrvPatcher
 {
@@ -138,6 +139,64 @@ namespace TermsrvPatcher
                 else
                 {
                     Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "LimitBlankPasswordUse", 1, RegistryValueKind.DWord);
+                }
+            }
+        }
+
+        public bool EnableTask
+        {
+            get
+            {
+                string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+
+                // Get the task service on the local machine
+                using (TaskService ts = new TaskService())
+                {
+                    Task task = ts.GetTask(assemblyName);
+                    return !(task is null);
+                }
+            }
+            set
+            {
+                string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+
+                // Get the task service on the local machine
+                using (TaskService ts = new TaskService())
+                {
+                    if (value)
+                    {
+                        // Create a new task definition
+                        TaskDefinition td = ts.NewTask();
+
+                        // Set task description
+                        td.RegistrationInfo.Description = "Automatically patch termsrv.dll at boot for re-enabling concurrent remote desktop connections after Windows updates";
+
+                        // Add trigger "At startup"
+                        td.Triggers.Add(new BootTrigger());
+
+                        // Add action to launch the current executing instance with the -unattended parameter
+                        td.Actions.Add(new ExecAction(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName), "-unattended", AppDomain.CurrentDomain.BaseDirectory));
+
+                        // Run as SYSTEM user
+                        td.Principal.UserId = "SYSTEM";
+
+                        // Also run on battery
+                        td.Settings.DisallowStartIfOnBatteries = false;
+
+                        // Register the task in the root folder
+                        ts.RootFolder.RegisterTaskDefinition(assemblyName, td);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            // Remove the task
+                            ts.RootFolder.DeleteTask(assemblyName);
+                        }
+                        catch
+                        {
+                        }
+                    }
                 }
             }
         }

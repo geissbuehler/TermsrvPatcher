@@ -78,6 +78,14 @@ namespace TermsrvPatcher
             {
                 radioButtonDisableBlank.IsChecked = true;
             }
+            if (patcher.EnableTask)
+            {
+                checkBoxTask.IsChecked = true;
+            }
+            else
+            {
+                checkBoxTask.IsChecked = false;
+            }
             radioButtonAutoMode.IsChecked = true;
             CheckStatus(false);
             formInitialized = true;
@@ -132,6 +140,7 @@ namespace TermsrvPatcher
                 radioButtonDisableMulti.IsEnabled = false;
                 radioButtonEnableBlank.IsEnabled = false;
                 radioButtonDisableBlank.IsEnabled = false;
+                checkBoxTask.IsEnabled = false;
             }
             else
             {
@@ -582,10 +591,18 @@ namespace TermsrvPatcher
 
         private void checkBoxTask_Checked(object sender, RoutedEventArgs e)
         {
+            if (formInitialized)
+            {
+                patcher.EnableTask = true;
+            }
         }
 
         private void checkBoxTask_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (formInitialized)
+            {
+                patcher.EnableTask = false;
+            }
         }
 
         private void HyperlinkPatcherVersion_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
