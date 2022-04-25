@@ -11,15 +11,15 @@
             <ColumnDefinition Width="0*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="textBoxFind" Height="23" Margin="204,82,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="textBoxFind_TextChanged"/>
-        <TextBox x:Name="textBoxReplace" Height="23" Margin="204,136,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="textBoxReplace_TextChanged"/>
+        <TextBox x:Name="textBoxFind" Height="23" Margin="204,82,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="TextBoxFind_TextChanged"/>
+        <TextBox x:Name="textBoxReplace" Height="23" Margin="204,136,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Column="1" TextChanged="TextBoxReplace_TextChanged"/>
         <Label x:Name="labelFind" Content="Find Pattern:" HorizontalAlignment="Left" Margin="204,56,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
         <Label x:Name="labelReplace" Content="Replace Pattern:" HorizontalAlignment="Left" Margin="204,110,0,0" VerticalAlignment="Top" Grid.Column="1" Height="26"/>
         <GroupBox x:Name="groupBoxRemoteDesktop" Header="Remote Desktop" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="185" Grid.Column="1">
             <StackPanel Margin="10,10,0,5">
                 <RadioButton x:Name="radioButtonEnableRdp" Content="Enable [required]" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonEnableRdp_Checked" Margin="0,0,10.143,0"/>
                 <RadioButton x:Name="radioButtonDisableRdp" Content="Disable" VerticalAlignment="Top" GroupName="EnableRdp" Checked="RadioButtonDisableRdp_Checked" Margin="0,0,10.143,0"/>
-                <CheckBox x:Name="checkBoxNla" Content="NLA [recommeded]" VerticalAlignment="Top" ToolTip="Allow connections only from computers running Remote Desktop with Network Level Authentication" Checked="checkBoxNla_Checked" Unchecked="checkBoxNla_Unchecked"/>
+                <CheckBox x:Name="checkBoxNla" Content="NLA [recommended]" VerticalAlignment="Top" ToolTip="Allow connections only from computers running Remote Desktop with Network Level Authentication" Checked="CheckBoxNla_Checked" Unchecked="CheckBoxNla_Unchecked"/>
             </StackPanel>
         </GroupBox>
         <Button x:Name="buttonPatch" Content="Patch" HorizontalAlignment="Left" Margin="204,9,0,0" VerticalAlignment="Top" Width="90" Click="ButtonPatch_Click" Grid.Column="1" Height="21"/>
@@ -45,14 +45,14 @@
                 <TextBlock x:Name="textBlockStatus" TextWrapping="Wrap" Text="Status: " VerticalAlignment="Top" Height="16" Margin="0,0,10.143,0"/>
             </StackPanel>
         </GroupBox>
-        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonManualMode_Checked"/>
-        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="radioButtonAutoMode_Checked"/>
+        <RadioButton x:Name="radioButtonManualMode" Grid.ColumnSpan="2" Content="Manual Patch Mode" HorizontalAlignment="Left" Margin="360,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="RadioButtonManualMode_Checked"/>
+        <RadioButton x:Name="radioButtonAutoMode" Grid.ColumnSpan="2" Content="Automatic Patch Mode" HorizontalAlignment="Left" Margin="204,40,0,0" VerticalAlignment="Top" GroupName="PatchMode" Checked="RadioButtonAutoMode_Checked"/>
         <TextBlock x:Name="TextBlockPatcherVersion"  Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,393,0,0" TextWrapping="Wrap" VerticalAlignment="Top">
-            <Hyperlink x:Name="HyperlinkPatcherVersion"  NavigateUri="https://github.com/geissbuehler/TermsrvPatcher/releases" RequestNavigate="HyperlinkPatcherVersion_RequestNavigate">Patcher version 0.0.0</Hyperlink>
+            <Hyperlink x:Name="HyperlinkPatcherVersion"  NavigateUri="https://github.com/geissbuehler/TermsrvPatcher/releases" RequestNavigate="HyperlinkPatcherVersion_RequestNavigate">Patcher version {0}</Hyperlink>
         </TextBlock>
         <GroupBox x:Name="groupBoxTask" Grid.ColumnSpan="2" Header="Scheduled Task" HorizontalAlignment="Left" Margin="10,244,0,0" VerticalAlignment="Top" Width="185">
             <StackPanel Margin="10,10,0,5">
-                <CheckBox x:Name="checkBoxTask" Content="Enable" Margin="0" VerticalAlignment="Top" ToolTip="Adds a scheduled task that patches termsrv.dll in unattended mode at system startup" Checked="checkBoxTask_Checked" Unchecked="checkBoxTask_Unchecked"/>
+                <CheckBox x:Name="checkBoxTask" Content="Enable" Margin="0" VerticalAlignment="Top" ToolTip="Add scheduled task to patch termsrv.dll in unattended mode at system startup for re-enabling concurrent remote desktop connections after Windows updates" Checked="CheckBoxTask_Checked" Unchecked="CheckBoxTask_Unchecked"/>
             </StackPanel>
         </GroupBox>
     </Grid>

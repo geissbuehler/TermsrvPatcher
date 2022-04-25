@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
-using System.Collections.Generic;
 using static TermsrvPatcher.Patcher.Status;
 
 namespace TermsrvPatcher
@@ -12,7 +12,6 @@ namespace TermsrvPatcher
     public partial class MainWindow : Window
     {
         private readonly Patcher patcher;
-        private readonly string unattendLog;
         private readonly bool formInitialized = false;
         private Patcher.Status status = Unkown;
         private string version = "";
@@ -24,28 +23,19 @@ namespace TermsrvPatcher
         public MainWindow()
         {
             worker.WorkerReportsProgress = true;
-            worker.DoWork += worker_DoWork;
-            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
-            worker.ProgressChanged += worker_ProgressChanged;
-            exitTimer.DoWork += exitTimer_DoWork;
-            exitTimer.RunWorkerCompleted += exitTimer_RunWorkerCompleted;
+            worker.DoWork += Worker_DoWork;
+            worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+            worker.ProgressChanged += Worker_ProgressChanged;
+            exitTimer.DoWork += ExitTimer_DoWork;
+            exitTimer.RunWorkerCompleted += ExitTimer_RunWorkerCompleted;
             InitializeComponent();
 
-            // Get Assemblyversion
-            string version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            // Remove last digit of Assemblyversion, except it is not equal to 0
-            version = System.Text.RegularExpressions.Regex.Replace(version, @"(\d\.\d\.\d)(\.0$)", "$1");
+            patcher = new Patcher();
+
             // Update the link text
             System.Windows.Documents.Run link = (System.Windows.Documents.Run)HyperlinkPatcherVersion.Inlines.FirstInline;
-            link.Text = String.Format("Patcher version {0}", version);
+            link.Text = string.Format(link.Text, patcher.AssemblyVersion);
 
-            unattendLog = System.Configuration.ConfigurationManager.AppSettings["unattendlog"];
-            if (String.IsNullOrEmpty(unattendLog))
-            {
-                unattendLog = "UnattendLog.txt";
-            }
-
-            patcher = new Patcher();
             if (patcher.AllowRdp)
             {
                 radioButtonEnableRdp.IsChecked = true;
@@ -105,7 +95,7 @@ namespace TermsrvPatcher
                     }
                     else if (status == Unkown)
                     {
-                        AddMessage("Patch status unkown, nothing to do");
+                        AddMessage("Patch status unknown, nothing to do");
                     }
                     AddMessage("---Exiting in 10 seconds---");
                     exitTimer.RunWorkerAsync();
@@ -183,7 +173,8 @@ namespace TermsrvPatcher
         {
             if (System.Windows.Forms.SystemInformation.TerminalServerSession)
             {
-                var result = System.Windows.Forms.MessageBox.Show(text, "RDP session detected", System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
+                var result = System.Windows.Forms.MessageBox.Show(text, "RDP session detected",
+                    System.Windows.Forms.MessageBoxButtons.YesNo, System.Windows.Forms.MessageBoxIcon.Question);
                 if (result == System.Windows.Forms.DialogResult.No)
                 {
                     return false;
@@ -201,13 +192,15 @@ namespace TermsrvPatcher
 
         private void Patch()
         {
-            worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text, textBoxReplace.Text) });
+            worker.RunWorkerAsync(argument: new object[] { true, Patcher.StringsToPatch(textBoxFind.Text,
+                textBoxReplace.Text) });
         }
 
         private void ButtonPatch_Click(object sender, RoutedEventArgs e)
         {
-            // Stoppig: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
-            if (CheckRdpSession($"The current remote desktop session will be disconnected and might remain unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
+            // Stopping: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
+            if (CheckRdpSession("The current remote desktop session will be disconnected and might remain " +
+                $"unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
             {
                 DisableControls();
                 Patch();
@@ -216,8 +209,9 @@ namespace TermsrvPatcher
 
         private void ButtonUnpatch_Click(object sender, RoutedEventArgs e)
         {
-            // Stoppig: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
-            if (CheckRdpSession($"The current remote desktop session will be disconnected and might remain unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
+            // Stopping: 3 * ServiceTimeout + Starting: 1 * ServiceTimeout
+            if (CheckRdpSession("The current remote desktop session will be disconnected and might remain " +
+                $"unreachable for more than {4 * Patcher.ServiceTimeout} seconds. Continue?"))
             {
                 DisableControls();
                 worker.RunWorkerAsync(argument: new object[] { false });
@@ -239,7 +233,7 @@ namespace TermsrvPatcher
             textBoxMessages.ScrollToEnd();
             if (App.unattended)
             {
-                System.IO.File.WriteAllText(unattendLog, textBoxMessages.Text);
+                System.IO.File.WriteAllText(patcher.UnattendLog, textBoxMessages.Text);
             }
         }
 
@@ -271,12 +265,14 @@ namespace TermsrvPatcher
                     catch (System.IO.FileNotFoundException)
                     {
                         readfileSuccess = false;
-                        AddMessage(String.Format("Error: patchfile '{0}' not found, prepare '{0}' or enter patches manually", patcher.Patchfile));
+                        AddMessage(string.Format("Error: patchfile '{0}' not found, prepare '{0}' or enter patches " +
+                            "manually", patcher.Patchfile));
                     }
                     catch (Exception exception)
                     {
                         readfileSuccess = false;
-                        AddMessage(String.Format("Error: Reading patchfile '{0}' failed, fix '{0}' or enter patches manually ({1})", patcher.Patchfile, exception.Message.ToString()));
+                        AddMessage(string.Format("Error: Reading patchfile '{0}' failed, fix '{0}' or enter patches " +
+                            "manually ({1})", patcher.Patchfile, exception.Message.ToString()));
                     }
                 }
 
@@ -291,14 +287,16 @@ namespace TermsrvPatcher
                         if (patchStatus == Patched)
                         {
                             patchedMatches++;
-                            AddMessage(String.Format("Patch on line {0} in '{1}' indicates patched termsrv.dll", (ulong)patch[1], patcher.Patchfile));
+                            AddMessage(string.Format("Patch on line {0} in '{1}' indicates patched termsrv.dll",
+                                (ulong)patch[1], patcher.Patchfile));
                         }
                         else
                         {
                             // Remember the patch to use it for patching as long as it remains the only match
                             matchingPatch = patch;
                             unpatchedMatches++;
-                            AddMessage(String.Format("Patch on line {0} in '{1}' indicates unpatched termsrv.dll", (ulong)patch[1], patcher.Patchfile));
+                            AddMessage(string.Format("Patch on line {0} in '{1}' indicates unpatched termsrv.dll",
+                                (ulong)patch[1], patcher.Patchfile));
                         }
                     }
                 }
@@ -306,19 +304,22 @@ namespace TermsrvPatcher
                 textBoxReplace.Text = "";
                 if (readfileSuccess)
                 {
-                    // Do not complain here again for missing patches if patch file reading skipped or failed (failed reading already shows other warnings)
+                    // Do not complain here again for missing patches if patch file reading skipped or failed
+                    // (failed reading already shows other warnings)
 
                     if (unpatchedMatches == 0 && patchedMatches == 0)
                     {
                         status = Unkown;
-                        AddMessage(String.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
+                        AddMessage(string.Format("Error: No matching patch for termsrv.dll found in patchfile '{0}', " +
+                            "edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
-                    else if (unpatchedMatches == 1 && patchedMatches == 0 )
+                    else if (unpatchedMatches == 1 && patchedMatches == 0)
                     {
                         // A single match for the unpatched status allows to patch termsrv.dll
 
                         status = Unpatched;
-                        AddMessage(String.Format("Automatic patching enabled: Matching patch for termsrv.dll in patchfile '{0}' found on line {1}", patcher.Patchfile, (ulong)matchingPatch[1]));
+                        AddMessage(string.Format("Automatic patching enabled: Matching patch for termsrv.dll in " +
+                            "patchfile '{0}' found on line {1}", patcher.Patchfile, (ulong)matchingPatch[1]));
                         foreach (List<object> subpatch in (List<object>)matchingPatch[0])
                         {
                             if (textBoxFind.Text != "")
@@ -335,18 +336,20 @@ namespace TermsrvPatcher
                         // More than one match for unpatched status
 
                         status = Unkown;
-                        AddMessage(String.Format("Error: Multiple patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
+                        AddMessage(string.Format("Error: Multiple patches for termsrv.dll found in patchfile '{0}', " +
+                            "edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
                     else if (unpatchedMatches == 0 && patchedMatches > 0)
                     {
-                        // One or more matches for the patched status is fine for the various Windows 10 termsrv.dll versions
+                        // One or more matches for the patched status is possible
 
                         status = Patched;
                     }
                     else if (unpatchedMatches > 0 && patchedMatches > 0)
                     {
                         status = Unkown;
-                        AddMessage(String.Format("Error: Contradicting patches for termsrv.dll found in patchfile '{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
+                        AddMessage(string.Format("Error: Contradicting patches for termsrv.dll found in patchfile " +
+                            "'{0}', edit '{0}' or enter patches manually", patcher.Patchfile));
                     }
                 }
                 else
@@ -374,7 +377,7 @@ namespace TermsrvPatcher
                 catch (Exception exception)
                 {
                     status = Unkown;
-                    AddMessage(String.Format("Error: {0}", exception.Message.ToString()));
+                    AddMessage(string.Format("Error: {0}", exception.Message.ToString()));
                 }
             }
             switch (status)
@@ -401,11 +404,12 @@ namespace TermsrvPatcher
             SetControls();
         }
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                worker.ReportProgress(20, new object[] { $"Stopping TermService (might take up to {3 * Patcher.ServiceTimeout} seconds)...", false });
+                worker.ReportProgress(20, new object[] { $"Stopping TermService (might take up to " +
+                    $"{3 * Patcher.ServiceTimeout} seconds)...", false });
                 patcher.StopTermService();
                 worker.ReportProgress(40, new object[] { " Done", true });
                 if (Convert.ToBoolean(((object[])e.Argument)[0]))
@@ -426,7 +430,8 @@ namespace TermsrvPatcher
                     patcher.Unpatch();
                     worker.ReportProgress(70, new object[] { " Done", true });
                 }
-                worker.ReportProgress(80, new object[] { $"Starting TermService (might take up to {Patcher.ServiceTimeout} seconds)...", false });
+                worker.ReportProgress(80, new object[] { "Starting TermService (might take up to " +
+                    $"{Patcher.ServiceTimeout} seconds)...", false });
                 try
                 {
                     patcher.StartTermService();
@@ -442,13 +447,16 @@ namespace TermsrvPatcher
             {
                 // Unable to stop the service
                 worker.ReportProgress(100, new object[] { " Failed", true });
-                worker.ReportProgress(100, new object[] { "Stop the Remote Desktop service manually and try again", false });
+                worker.ReportProgress(100, new object[] { "Stop the Remote Desktop service manually and try again",
+                    false });
             }
             // HResult = 32 -> ERROR_SHARING_VIOLATION -> File in use by another process
             catch (System.IO.IOException exception) when ((exception.HResult & 0x0000FFFF) == 32)
             {
                 worker.ReportProgress(100, new object[] { " Failed", true });
-                worker.ReportProgress(100, new object[] { $"{patcher.TermsrvPath} is in use by another process, stop the Remote Desktop service manually and make sure no process is locking the file and try again", false });
+                worker.ReportProgress(100, new object[] { $"{patcher.TermsrvPath} is in use by another process, stop " +
+                    "the Remote Desktop service manually and make sure no process is locking the file and try again",
+                    false });
             }
             catch (Exception exception)
             {
@@ -456,12 +464,12 @@ namespace TermsrvPatcher
             }
         }
 
-        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             AddMessage((string)((object[])e.UserState)[0], Convert.ToBoolean(((object[])e.UserState)[1]));
         }
 
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             AddMessage("Old status: " + status);
             CheckStatus(true);
@@ -474,17 +482,17 @@ namespace TermsrvPatcher
             }
         }
 
-        private void exitTimer_DoWork(object sender, DoWorkEventArgs e)
+        private void ExitTimer_DoWork(object sender, DoWorkEventArgs e)
         {
             System.Threading.Thread.Sleep(10000);
         }
 
-        private void exitTimer_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void ExitTimer_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Application.Current.Shutdown();
         }
 
-        private void textBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void TextBoxFind_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
@@ -492,7 +500,7 @@ namespace TermsrvPatcher
             }
         }
 
-        private void textBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void TextBoxReplace_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             if (formInitialized && (radioButtonManualMode.IsChecked == true))
             {
@@ -513,7 +521,8 @@ namespace TermsrvPatcher
         {
             if (formInitialized)
             {
-                if (CheckRdpSession("The current remote desktop session will be disconnected and the system will no more be accessible via remote desktop. Continue?"))
+                if (CheckRdpSession("The current remote desktop session will be disconnected and the system will no " +
+                    "more be accessible via remote desktop. Continue?"))
                 {
                     patcher.AllowRdp = false;
                     patcher.SetFirewall(false);
@@ -525,7 +534,7 @@ namespace TermsrvPatcher
             }
         }
 
-        private void checkBoxNla_Checked(object sender, RoutedEventArgs e)
+        private void CheckBoxNla_Checked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
@@ -533,7 +542,7 @@ namespace TermsrvPatcher
             }
         }
 
-        private void checkBoxNla_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBoxNla_Unchecked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
@@ -573,7 +582,7 @@ namespace TermsrvPatcher
             }
         }
 
-        private void radioButtonAutoMode_Checked(object sender, RoutedEventArgs e)
+        private void RadioButtonAutoMode_Checked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
@@ -581,7 +590,7 @@ namespace TermsrvPatcher
             }
         }
 
-        private void radioButtonManualMode_Checked(object sender, RoutedEventArgs e)
+        private void RadioButtonManualMode_Checked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
@@ -589,23 +598,27 @@ namespace TermsrvPatcher
             }
         }
 
-        private void checkBoxTask_Checked(object sender, RoutedEventArgs e)
+        private void CheckBoxTask_Checked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
                 patcher.EnableTask = true;
+                AddMessage($"Scheduled task '{patcher.AssemblyName}' added (requires valid patches in " +
+                    $"'{patcher.Patchfile}', logging to '{patcher.UnattendLog}')");
             }
         }
 
-        private void checkBoxTask_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBoxTask_Unchecked(object sender, RoutedEventArgs e)
         {
             if (formInitialized)
             {
                 patcher.EnableTask = false;
+                AddMessage($"Scheduled task '{patcher.AssemblyName}' removed.");
             }
         }
 
-        private void HyperlinkPatcherVersion_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        private void HyperlinkPatcherVersion_RequestNavigate(object sender,
+            System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());
         }
