@@ -23,4 +23,4 @@ For legal reasons, only example patches are available in the included Patches.tx
 
 ## Screenshot
 
-![Screenshot](screenshot200percent.png)
+![Screenshot](screenshot100percent.png)
